@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#fff8f2">
-  <title>PrixRadar — Comparateur de prix</title>
+  <meta name="theme-color" content="#191a1c">
+  <title>PrixRadar — Découvre des produits</title>
   <style>
     :root {
       color-scheme: light;
@@ -716,6 +716,462 @@
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
     }
+
+    /* Theme charbon interactif */
+    :root {
+      color-scheme: dark;
+      --ink: #f4ede8;
+      --muted: #b6aaa2;
+      --green: #ff8b38;
+      --green-dark: #ffb36f;
+      --mint: #3c2d24;
+      --line: #3b3b3e;
+      --paper: #242528;
+      --canvas: #191a1c;
+      --shadow: 0 20px 54px rgba(0, 0, 0, .38);
+    }
+    body {
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 12%, rgba(239, 112, 37, .14), transparent 25rem),
+        radial-gradient(circle at 92% 58%, rgba(223, 92, 25, .1), transparent 30rem),
+        #191a1c;
+    }
+    .brand, .market-card-heading, .product-title, .offer-price { color: var(--ink); }
+    .top-note, .market-picker-title, .market-tip, .free-note, .count, .sort-wrap { color: #c0b2a8; }
+    .status-dot { box-shadow: 0 0 0 4px rgba(255, 139, 56, .14); }
+    .hero {
+      background:
+        radial-gradient(ellipse at 50% -10%, rgba(255, 255, 255, .055), transparent 42%),
+        radial-gradient(ellipse at 82% 35%, rgba(223, 92, 25, .12), transparent 32%),
+        linear-gradient(135deg, #242426 0%, #1c1d1f 63%, #211d1a 100%);
+    }
+    .hero::before {
+      background: radial-gradient(circle at 32% 25%, #fff0da 0 3%, #ffb464 11%, #f47723 38%, rgba(242, 104, 27, .28) 68%, transparent 74%);
+      opacity: .57;
+    }
+    .hero::after {
+      border-color: rgba(255, 144, 67, .24);
+      box-shadow: 0 0 0 24px rgba(242, 122, 36, .065), 0 0 0 52px rgba(242, 122, 36, .035);
+    }
+    .eyebrow {
+      border-color: rgba(255, 157, 94, .25);
+      color: #ffc38e;
+      background: rgba(34, 32, 31, .78);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .16);
+    }
+    .hero-copy { color: #d2c2b7; }
+    .search {
+      border-color: #4b3b31;
+      background: #292a2c;
+      box-shadow: 0 18px 46px rgba(0, 0, 0, .28);
+    }
+    .search:focus-within {
+      border-color: #ed9a62;
+      box-shadow: 0 0 0 4px rgba(242, 122, 36, .16), 0 18px 46px rgba(0, 0, 0, .3);
+    }
+    .search-icon { color: #d49566; }
+    .search input { color: #fff7f1; }
+    .search input::placeholder { color: #a99b92; }
+    .market-chip {
+      border-color: #484144;
+      color: #dfd1c8;
+      background: rgba(40, 39, 40, .88);
+    }
+    .market-chip:hover { border-color: #e98d53; color: #ffd0a4; }
+    .market-results {
+      border-color: #3c3c3f;
+      background: #212224;
+      box-shadow: 0 14px 42px rgba(0, 0, 0, .24);
+    }
+    .market-result-note, .market-card-meta, .market-original, .market-source,
+    .market-delivery, .market-price-label, .market-status { color: #b5a79f; }
+    .market-card {
+      border-color: #414144;
+      background: linear-gradient(145deg, #292a2d, #222326);
+    }
+    .market-card.is-cheapest {
+      border-color: #b46a3c;
+      background: linear-gradient(145deg, #382a23, #2c2421);
+      box-shadow: 0 0 0 2px rgba(242, 122, 36, .13);
+    }
+    .market-card-heading { color: #f6eee8; }
+    .cheapest-summary {
+      border-color: #563a2b;
+      color: #f6cfad;
+      background: linear-gradient(100deg, #33261f, #272426);
+    }
+    .market-cheapest-tag { color: #ffd3aa; background: #573623; }
+    .market-price-main, .market-converted, .market-link { color: #ffab68; }
+    .market-error { color: #ffc2a0; }
+    .market-price-input, .market-currency-select, .sort-wrap select {
+      border-color: #484145;
+      color: #f4ede8;
+      background: #2a2b2e;
+    }
+    .filter {
+      border-color: #464144;
+      color: #e0d2c9;
+      background: #262729;
+    }
+    .filter:hover { border-color: #e99a67; color: #ffd0a5; }
+    .card {
+      border-color: #3d3e41;
+      background: #242528;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .23);
+    }
+    .card:hover { box-shadow: 0 20px 42px rgba(0, 0, 0, .38); }
+    .product-image { background: linear-gradient(135deg, #332923, #282528); }
+    .product-image.image-fallback::after { color: #e2c5ad; }
+    .category-tag {
+      border-color: rgba(255, 193, 143, .18);
+      color: #ffd1a5;
+      background: rgba(38, 35, 33, .9);
+    }
+    .product-description { color: #b7aaa2; }
+    .offers { border-color: #3b3c3e; }
+    .offers-head { color: #b5a69d; }
+    .offer-row { border-color: #393a3c; }
+    .seller-mark { color: #ffc08b; background: #3d2d23; }
+    .seller-name { color: #efe5de; }
+    .seller-label { color: #b0a29a; }
+    .demo-banner {
+      border-color: #4b392d;
+      color: #e4c6ad;
+      background: linear-gradient(100deg, #30251f, #252326);
+    }
+    .empty-state { border-color: #574334; color: #c7b7ac; background: rgba(39, 38, 39, .85); }
+    .empty-state strong { color: #f4ede8; }
+    footer { border-color: #38393b; color: #b6aaa2; background: #202123; }
+    ::selection { color: #211711; background: #ffac68; }
+
+    .play-orb {
+      position: fixed;
+      z-index: 30;
+      right: 24px;
+      bottom: 24px;
+      width: 72px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      touch-action: none;
+      cursor: grab;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      filter: drop-shadow(0 10px 16px rgba(0, 0, 0, .35));
+    }
+    .play-orb:active, .play-orb.is-dragging { cursor: grabbing; }
+    .play-orb:focus-visible { outline: 3px solid #ffd0a2; outline-offset: 8px; }
+    .play-orb-ring {
+      position: absolute;
+      inset: -8px;
+      border: 1px solid rgba(255, 168, 103, .52);
+      border-radius: 50%;
+      box-shadow: 0 0 0 7px rgba(242, 122, 36, .11), 0 0 28px rgba(242, 122, 36, .2);
+      animation: orb-ring 12s linear infinite;
+      transition: inset .25s ease, box-shadow .25s ease;
+    }
+    .play-orb-core {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border: 1px solid rgba(255, 233, 205, .75);
+      border-radius: 50%;
+      background: radial-gradient(circle at 31% 23%, #fff4df 0 3%, #ffd293 10%, #ff9d45 27%, #f2701f 58%, #a83d12 100%);
+      box-shadow: inset -9px -12px 19px rgba(98, 29, 5, .45), inset 6px 7px 13px rgba(255, 255, 255, .31), 0 0 25px rgba(244, 111, 30, .28);
+      animation: orb-hover 4.6s ease-in-out infinite;
+      transition: transform .22s ease, filter .22s ease;
+    }
+    .play-orb-shine {
+      position: absolute;
+      top: 13%;
+      left: 19%;
+      width: 27%;
+      height: 17%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .76);
+      filter: blur(3px);
+      transform: rotate(-35deg);
+    }
+    .play-orb.is-charged .play-orb-core { filter: saturate(1.32) brightness(1.08); transform: scale(1.1); }
+    .play-orb.is-charged .play-orb-ring { inset: -13px; box-shadow: 0 0 0 10px rgba(242, 122, 36, .14), 0 0 38px rgba(255, 121, 36, .42); }
+    .play-orb.is-dragging .play-orb-core { animation: none; transform: scale(1.08); }
+    @keyframes orb-hover { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    @keyframes orb-ring { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+    @keyframes orb-pop { 0% { transform: scale(.86); } 65% { transform: scale(1.16); } 100% { transform: scale(1.1); } }
+    .play-orb.is-charged .play-orb-core { animation: orb-pop .35s cubic-bezier(.2,.8,.2,1), orb-hover 4.6s .35s ease-in-out infinite; }
+    @media (max-width: 600px) {
+      .play-orb { right: 17px; bottom: 18px; width: 58px; height: 58px; }
+      .play-orb-ring { inset: -6px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .play-orb-core, .play-orb-ring { animation: none !important; }
+    }
+    /* Fil découverte PrixRadar */
+    main { width: min(1360px, calc(100% - 48px)); padding-top: 34px; }
+    .topbar {
+      position: relative;
+      z-index: 12;
+      width: min(1360px, calc(100% - 48px));
+    }
+    .catalog-head { align-items: center; margin: 0 0 16px; }
+    .catalog-head h2 { font-size: clamp(25px, 3vw, 34px); letter-spacing: -1.1px; }
+    .catalog-head .section-kicker { color: #ffad70; }
+    .sort-wrap { color: #c5b7ae; }
+    .filters {
+      position: sticky;
+      top: 10px;
+      z-index: 10;
+      gap: 8px;
+      margin: 0 0 22px;
+      padding: 9px;
+      border: 1px solid rgba(255, 177, 122, .13);
+      border-radius: 17px;
+      background: rgba(28, 28, 30, .88);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, .24);
+      backdrop-filter: blur(16px);
+    }
+    .filter {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 15px;
+      border-color: transparent;
+      background: transparent;
+    }
+    .filter span { color: #ffad70; font-size: 15px; }
+    .filter:hover { border-color: #72503b; color: #ffe0c4; background: rgba(255, 139, 56, .08); }
+    .filter[aria-pressed="true"] {
+      border-color: #f88c42;
+      color: #271a12;
+      background: linear-gradient(135deg, #ffb06f, #f27727);
+      box-shadow: 0 5px 16px rgba(242, 122, 36, .22);
+    }
+    .filter[aria-pressed="true"] span { color: #4b2813; }
+    .product-grid {
+      display: block;
+      columns: 4 230px;
+      column-gap: 17px;
+    }
+    .card {
+      display: inline-block;
+      width: 100%;
+      margin: 0 0 17px;
+      overflow: hidden;
+      break-inside: avoid;
+      vertical-align: top;
+      border-color: #3e3d3f;
+      border-radius: 19px;
+      background: linear-gradient(155deg, #252629, #202123);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .24);
+      animation: rise-in .45s both;
+    }
+    .card:nth-child(2) { animation-delay: .04s; }
+    .card:nth-child(3) { animation-delay: .08s; }
+    .card:hover { transform: translateY(-5px); border-color: #735039; box-shadow: 0 20px 42px rgba(0, 0, 0, .36); }
+    .product-image {
+      height: auto;
+      aspect-ratio: 1.08 / 1;
+      background: linear-gradient(135deg, #332923, #282528);
+    }
+    .card:nth-child(5n + 2) .product-image { aspect-ratio: .84 / 1; }
+    .card:nth-child(7n + 4) .product-image { aspect-ratio: 1.28 / 1; }
+    .card:nth-child(9n + 6) .product-image { aspect-ratio: .96 / 1; }
+    .product-image img { height: 100%; }
+    .product-image::after { content: ""; position: absolute; inset: auto 0 0; height: 28%; background: linear-gradient(transparent, rgba(18, 18, 19, .23)); pointer-events: none; }
+    .category-tag {
+      z-index: 1;
+      top: 11px;
+      left: 11px;
+      padding: 7px 10px;
+      border-color: rgba(255, 195, 143, .22);
+      color: #ffe0c3;
+      background: rgba(27, 26, 26, .78);
+      letter-spacing: .04em;
+      backdrop-filter: blur(10px);
+    }
+    .save-button {
+      position: absolute;
+      z-index: 2;
+      top: 10px;
+      right: 10px;
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      padding: 0 0 2px;
+      border: 1px solid rgba(255, 226, 202, .22);
+      border-radius: 50%;
+      color: white;
+      background: rgba(25, 25, 27, .76);
+      font-size: 25px;
+      line-height: 1;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: transform .18s ease, color .18s ease, background .18s ease;
+    }
+    .save-button:hover { transform: scale(1.09); background: rgba(44, 33, 27, .92); }
+    .save-button.is-saved { color: #ff9d58; background: rgba(49, 31, 21, .94); }
+    .card-body { padding: 14px 15px 15px; }
+    .product-title { font-size: 17px; line-height: 1.25; }
+    .product-description { min-height: 0; margin-bottom: 13px; }
+    .offers { padding-top: 10px; }
+    .offers-head { margin-bottom: 2px; }
+    .compare-button {
+      width: 100%;
+      margin-top: 11px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 169, 106, .25);
+      border-radius: 10px;
+      color: #ffd5b3;
+      background: rgba(255, 139, 56, .11);
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .compare-button:hover { transform: translateY(-1px); border-color: #f18f50; background: rgba(255, 139, 56, .2); }
+    .compare-button:focus-visible, .save-button:focus-visible {
+      outline: 3px solid rgba(255, 176, 111, .55);
+      outline-offset: 3px;
+    }
+    .empty-state { column-span: all; }
+    .market-results { scroll-margin-top: 18px; }
+    .demo-banner { margin-top: 28px; }
+    @media (max-width: 1080px) {
+      .product-grid { columns: 3 220px; }
+    }
+    @media (max-width: 780px) {
+      .product-grid { columns: 2 210px; }
+      .catalog-head { align-items: flex-start; }
+      .sort-wrap { flex-direction: column; align-items: flex-start; gap: 5px; white-space: normal; }
+    }
+    @media (max-width: 600px) {
+      main, .topbar { width: min(100% - 28px, 1360px); }
+      main { padding-top: 25px; }
+      .filters { top: 6px; gap: 5px; padding: 7px; }
+      .filter { gap: 6px; padding: 9px 11px; font-size: 12px; }
+      .card-body { padding: 12px; }
+      .offers-head { font-size: 8px; }
+      .seller-mark { width: 25px; height: 25px; }
+      .seller-name { font-size: 10px; }
+      .offer-price { font-size: 12px; }
+    }
+    @media (max-width: 420px) {
+      .product-grid { columns: 1; }
+      .product-image { aspect-ratio: 1.1 / 1 !important; }
+      .catalog-head { flex-direction: column; align-items: flex-start; }
+      .sort-wrap { flex-direction: row; align-items: center; }
+    }
+    /* Fil de découverte sans comparateur */
+    .top-note { color: #e4c6ad; }
+    .hero-copy { max-width: 650px; }
+    main { width: min(1360px, calc(100% - 48px)); padding-top: 34px; }
+    .catalog-head { align-items: flex-end; margin-bottom: 16px; }
+    .catalog-head h2 { font-size: clamp(25px, 3vw, 34px); letter-spacing: -1.1px; }
+    .catalog-head .section-kicker { color: #ffad70; }
+    .count { max-width: 720px; line-height: 1.5; }
+    .filters {
+      position: sticky;
+      top: 10px;
+      z-index: 10;
+      gap: 8px;
+      margin: 0 0 22px;
+      padding: 9px;
+      border: 1px solid rgba(255, 177, 122, .13);
+      border-radius: 17px;
+      background: rgba(28, 28, 30, .9);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, .24);
+      backdrop-filter: blur(16px);
+    }
+    .filter {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 15px;
+      border-color: transparent;
+      color: #e0d2c9;
+      background: transparent;
+    }
+    .filter span { color: #ffad70; font-size: 15px; }
+    .filter:hover { border-color: #72503b; color: #ffe0c4; background: rgba(255, 139, 56, .08); }
+    .filter[aria-pressed="true"] {
+      border-color: #f88c42;
+      color: #271a12;
+      background: linear-gradient(135deg, #ffb06f, #f27727);
+      box-shadow: 0 5px 16px rgba(242, 122, 36, .22);
+    }
+    .filter[aria-pressed="true"] span { color: #4b2813; }
+    .product-grid { display: block; columns: 4 230px; column-gap: 17px; }
+    .card {
+      display: inline-block;
+      width: 100%;
+      margin: 0 0 17px;
+      overflow: hidden;
+      break-inside: avoid;
+      vertical-align: top;
+      border-color: #3e3d3f;
+      border-radius: 19px;
+      background: linear-gradient(155deg, #252629, #202123);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .24);
+      animation: rise-in .45s both;
+    }
+    .card:nth-child(2) { animation-delay: .04s; }
+    .card:nth-child(3) { animation-delay: .08s; }
+    .card:hover { transform: translateY(-5px); border-color: #735039; box-shadow: 0 20px 42px rgba(0, 0, 0, .36); }
+    .product-image { height: auto; aspect-ratio: 1.08 / 1; }
+    .card:nth-child(5n + 2) .product-image { aspect-ratio: .84 / 1; }
+    .card:nth-child(7n + 4) .product-image { aspect-ratio: 1.28 / 1; }
+    .card:nth-child(9n + 6) .product-image { aspect-ratio: .96 / 1; }
+    .product-image img { height: 100%; }
+    .category-tag {
+      z-index: 1;
+      top: 11px;
+      left: 11px;
+      padding: 7px 10px;
+      color: #ffe0c3;
+      border-color: rgba(255, 195, 143, .22);
+      background: rgba(27, 26, 26, .78);
+      backdrop-filter: blur(10px);
+    }
+    .card-body { padding: 15px 16px 17px; }
+    .product-description { min-height: 0; margin: 7px 0 0; }
+    .feed-end { display: grid; justify-items: center; gap: 10px; padding: 28px 12px 14px; text-align: center; }
+    #feedStatus { min-height: 18px; margin: 0; color: #b6aaa2; font-size: 12px; }
+    .feed-load-more {
+      padding: 11px 18px;
+      border: 1px solid rgba(255, 169, 106, .3);
+      border-radius: 999px;
+      color: #ffd5b3;
+      background: rgba(255, 139, 56, .13);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .feed-load-more:hover { transform: translateY(-2px); border-color: #f18f50; background: rgba(255, 139, 56, .22); }
+    .feed-load-more:focus-visible { outline: 3px solid rgba(255, 176, 111, .55); outline-offset: 3px; }
+    #feedSentinel { width: 100%; height: 1px; }
+    .demo-banner { margin-top: 30px; }
+    @media (max-width: 1080px) { .product-grid { columns: 3 220px; } }
+    @media (max-width: 780px) { .product-grid { columns: 2 210px; } }
+    @media (max-width: 600px) {
+      main, .topbar { width: min(100% - 28px, 1360px); }
+      main { padding-top: 25px; }
+      .filters { top: 6px; gap: 5px; padding: 7px; }
+      .filter { gap: 6px; padding: 9px 11px; font-size: 12px; }
+      .card-body { padding: 12px; }
+    }
+    @media (max-width: 420px) {
+      .product-grid { columns: 1; }
+      .product-image { aspect-ratio: 1.1 / 1 !important; }
+      .catalog-head { align-items: flex-start; }
+    }
   </style>
 </head>
 <body>
@@ -731,74 +1187,62 @@
       </span>
       <span>Prix<span>Radar</span></span>
     </a>
-    <div class="top-note"><span class="status-dot" aria-hidden="true"></span>Comparateur gratuit · démo</div>
+    <div class="top-note"><span class="status-dot" aria-hidden="true"></span>Découverte gratuite · démo</div>
   </header>
 
   <section class="hero">
     <div class="hero-inner">
       <div class="eyebrow">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" fill="currentColor"/></svg>
-        Une démo gratuite
+        Le fil PrixRadar
       </div>
-      <h1>Les bons prix se<br><span>repèrent ici.</span></h1>
-      <p class="hero-copy">Recherche un produit et compare automatiquement les offres Google Shopping dans plusieurs pays.</p>
+      <h1>Défile, découvre,<br><span>collectionne.</span></h1>
+      <p class="hero-copy">Des idées dans tous les univers. Parcours le fil, choisis une catégorie et garde tes coups de cœur.</p>
       <form class="search" id="searchForm" role="search">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input id="searchInput" type="search" required placeholder="Ex. smartphone, baskets, lampe…" aria-label="Rechercher un produit">
-        <button type="submit">Comparer les pays</button>
+        <input id="searchInput" type="search" placeholder="Ex. roman, baskets, casque…" aria-label="Rechercher une idée">
+        <button type="submit">Explorer</button>
       </form>
-      <p class="free-note">Recherche automatique · quota gratuit limité · clé privée requise</p>
-      <div class="market-picker">
-        <p class="market-picker-title">Comparer Google Shopping par pays</p>
-        <div class="market-chips" id="marketButtons" role="group" aria-label="Pays à comparer"></div>
-        <p class="market-tip">Choisis les pays à comparer, puis lance ta recherche.</p>
-      </div>
+      <p class="free-note">Un fil de découverte gratuit · produits de démonstration</p>
     </div>
   </section>
 
   <main>
-    <section class="market-results" id="marketResults" hidden aria-live="polite" aria-labelledby="marketResultTitle">
-      <p class="section-kicker">Recherche par pays</p>
-      <h2 id="marketResultTitle"></h2>
-      <p class="cheapest-summary" id="cheapestSummary" role="status" aria-live="polite">Les prix saisis apparaîtront ici, classés en euros.</p>
-      <p class="market-result-note" id="marketResultNote">Les offres viennent de Google Shopping et sont converties en euros avec un taux de référence. Vérifie le modèle exact, la livraison, les taxes et la douane avant de comparer le coût total.</p>
-      <div class="market-grid" id="marketGrid"></div>
-    </section>
     <div class="catalog-head">
       <div>
-        <p class="section-kicker">La sélection PrixRadar</p>
-        <h2>Exemples de produits</h2>
+        <p class="section-kicker">Le fil PrixRadar</p>
+        <h2>À toi de découvrir</h2>
         <p class="count" id="resultCount" aria-live="polite"></p>
       </div>
-      <label class="sort-wrap" for="sortSelect">
-        Trier par
-        <select id="sortSelect" aria-label="Trier les produits par prix">
-          <option value="ascending">Prix : du moins cher au plus cher</option>
-          <option value="descending">Prix : du plus cher au moins cher</option>
-        </select>
-      </label>
     </div>
 
-    <nav class="filters" aria-label="Filtrer par catégorie">
-      <button class="filter" type="button" data-filter="all" aria-pressed="true">Tout voir</button>
-      <button class="filter" type="button" data-filter="phones" aria-pressed="false">Téléphones</button>
-      <button class="filter" type="button" data-filter="computing" aria-pressed="false">Informatique</button>
-      <button class="filter" type="button" data-filter="clothing" aria-pressed="false">Vêtements</button>
-      <button class="filter" type="button" data-filter="home" aria-pressed="false">Maison</button>
+    <nav class="filters" aria-label="Explorer les catégories">
+      <button class="filter" type="button" data-filter="all" aria-pressed="true"><span aria-hidden="true">✦</span> Tout</button>
+      <button class="filter" type="button" data-filter="informatique" aria-pressed="false"><span aria-hidden="true">⌘</span> Informatique</button>
+      <button class="filter" type="button" data-filter="culture" aria-pressed="false"><span aria-hidden="true">✎</span> Culture</button>
+      <button class="filter" type="button" data-filter="mode" aria-pressed="false"><span aria-hidden="true">◇</span> Mode</button>
+      <button class="filter" type="button" data-filter="maison" aria-pressed="false"><span aria-hidden="true">⌂</span> Maison</button>
+      <button class="filter" type="button" data-filter="sport" aria-pressed="false"><span aria-hidden="true">↗</span> Sport</button>
+      <button class="filter" type="button" data-filter="gaming" aria-pressed="false"><span aria-hidden="true">▣</span> Gaming</button>
     </nav>
 
-    <section class="product-grid" id="productGrid" aria-label="Produits et offres fictifs"></section>
+    <section class="product-grid" id="productGrid" aria-label="Fil de produits de démonstration"></section>
+
+    <div class="feed-end">
+      <p id="feedStatus" aria-live="polite"></p>
+      <button class="feed-load-more" id="loadMoreButton" type="button">Charger la suite</button>
+      <div id="feedSentinel" aria-hidden="true"></div>
+    </div>
 
     <aside class="demo-banner">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.8v5.4M12 7.8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <span><strong>À savoir :</strong> tous les produits, prix et noms de vendeurs sur cette page sont fictifs et servent uniquement à illustrer le fonctionnement de PrixRadar. Les images sont des visuels d’exemple hébergés par Unsplash.</span>
+      <span><strong>Démo :</strong> les 36 fiches de départ, leurs descriptions et les images sont des exemples fictifs. Le fil crée des variantes de démonstration au fur et à mesure du défilement ; ce ne sont pas un milliard de produits réels.</span>
     </aside>
   </main>
 
-  <footer>PrixRadar · Projet de démonstration gratuit · Aucune offre commerciale réelle</footer>
-
+  <footer>PrixRadar · Fil de découverte fictif · Sans comparaison de prix</footer>
   <script>
-    const products = [
+    const productSeeds = [
       {
         title: "Lampe Halo",
         category: "home",
@@ -806,7 +1250,6 @@
         description: "Une lumière douce pour créer une ambiance chaleureuse.",
         image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=1000&q=82",
         imageAlt: "Lampe de table dans un intérieur lumineux",
-        offers: [{ seller: "Vendeur fictif A", price: 39 }, { seller: "Vendeur fictif B", price: 46 }]
       },
       {
         title: "Baskets Tempo",
@@ -815,7 +1258,6 @@
         description: "Des baskets légères pour accompagner les journées actives.",
         image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1000&q=82",
         imageAlt: "Basket rouge photographiée sur fond clair",
-        offers: [{ seller: "Vendeur fictif A", price: 74 }, { seller: "Vendeur fictif B", price: 82 }]
       },
       {
         title: "Casque Studio",
@@ -824,7 +1266,6 @@
         description: "Un casque sans fil pour écouter musique et podcasts.",
         image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=82",
         imageAlt: "Casque audio posé sur une surface claire",
-        offers: [{ seller: "Vendeur fictif A", price: 89 }, { seller: "Vendeur fictif B", price: 105 }]
       },
       {
         title: "Veste Alba",
@@ -833,7 +1274,6 @@
         description: "Une veste décontractée à porter en toute saison.",
         image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1000&q=82",
         imageAlt: "Veste sur cintre dans un studio",
-        offers: [{ seller: "Vendeur fictif A", price: 96 }, { seller: "Vendeur fictif B", price: 119 }]
       },
       {
         title: "Fauteuil Noma",
@@ -842,7 +1282,6 @@
         description: "Un fauteuil compact pour aménager un coin lecture.",
         image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1000&q=82",
         imageAlt: "Coin salon lumineux avec mobilier contemporain",
-        offers: [{ seller: "Vendeur fictif A", price: 189 }, { seller: "Vendeur fictif B", price: 219 }]
       },
       {
         title: "Smartphone Nova",
@@ -851,7 +1290,6 @@
         description: "Un téléphone de démonstration avec grand écran.",
         image: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=1000&q=82",
         imageAlt: "Smartphone présenté sur un fond coloré",
-        offers: [{ seller: "Vendeur fictif A", price: 279 }, { seller: "Vendeur fictif B", price: 319 }]
       },
       {
         title: "Téléphone Pulse 5G",
@@ -860,7 +1298,6 @@
         description: "Un modèle fictif pour comparer plusieurs offres.",
         image: "https://images.unsplash.com/photo-1511709268805-0e5e3a345e73?auto=format&fit=crop&w=1000&q=82",
         imageAlt: "Téléphone mobile vu de face",
-        offers: [{ seller: "Vendeur fictif A", price: 349 }, { seller: "Vendeur fictif B", price: 389 }]
       },
       {
         title: "Ordinateur Horizon",
@@ -869,7 +1306,6 @@
         description: "Un ordinateur portable fictif pour le travail et les études.",
         image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1000&q=82",
         imageAlt: "Ordinateur portable ouvert sur un bureau",
-        offers: [{ seller: "Vendeur fictif A", price: 649 }, { seller: "Vendeur fictif B", price: 729 }]
       },
     {
       title: "Téléphone Mini",
@@ -878,7 +1314,6 @@
       description: "Un format compact imaginé pour cette démo.",
       image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Téléphone compact photographié sur fond clair",
-      offers: [{ seller: "Vendeur fictif A", price: 159 }, { seller: "Vendeur fictif B", price: 179 }]
     },
     {
       title: "Smartphone Aster",
@@ -887,7 +1322,6 @@
       description: "Un modèle de démonstration avec écran lumineux.",
       image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Smartphone de démonstration vu de près",
-      offers: [{ seller: "Vendeur fictif A", price: 229 }, { seller: "Vendeur fictif B", price: 249 }]
     },
     {
       title: "Téléphone Lumen",
@@ -896,7 +1330,6 @@
       description: "Un téléphone fictif pour comparer les niveaux de prix.",
       image: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Téléphone mobile sur fond coloré",
-      offers: [{ seller: "Vendeur fictif A", price: 459 }, { seller: "Vendeur fictif B", price: 489 }]
     },
     {
       title: "Smartphone Solar",
@@ -905,7 +1338,6 @@
       description: "Un grand écran de démonstration avec appareil photo fictif.",
       image: "https://images.unsplash.com/photo-1511709268805-0e5e3a345e73?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Smartphone présenté sur une surface claire",
-      offers: [{ seller: "Vendeur fictif A", price: 529 }, { seller: "Vendeur fictif B", price: 579 }]
     },
     {
       title: "Souris Flux",
@@ -914,7 +1346,6 @@
       description: "Une souris sans fil fictive pour le bureau.",
       image: "https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Souris d’ordinateur sur un bureau",
-      offers: [{ seller: "Vendeur fictif A", price: 24 }, { seller: "Vendeur fictif B", price: 31 }]
     },
     {
       title: "Clavier Nova",
@@ -923,7 +1354,6 @@
       description: "Un clavier compact de démonstration.",
       image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Clavier d’ordinateur photographié de dessus",
-      offers: [{ seller: "Vendeur fictif A", price: 59 }, { seller: "Vendeur fictif B", price: 72 }]
     },
     {
       title: "Webcam Clair",
@@ -932,7 +1362,6 @@
       description: "Une webcam fictive pour les appels vidéo.",
       image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Appareil photo numérique utilisé comme visuel de démonstration",
-      offers: [{ seller: "Vendeur fictif A", price: 79 }, { seller: "Vendeur fictif B", price: 94 }]
     },
     {
       title: "Écran Boréal 27",
@@ -941,7 +1370,6 @@
       description: "Un écran de bureau fictif au format panoramique.",
       image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Écran d’ordinateur sur un bureau",
-      offers: [{ seller: "Vendeur fictif A", price: 229 }, { seller: "Vendeur fictif B", price: 269 }]
     },
     {
       title: "Chaussettes Coton",
@@ -950,7 +1378,6 @@
       description: "Un lot de chaussettes tout doux pour la démo.",
       image: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Vêtement en coton plié",
-      offers: [{ seller: "Vendeur fictif A", price: 12 }, { seller: "Vendeur fictif B", price: 16 }]
     },
     {
       title: "T-shirt Atlas",
@@ -959,7 +1386,6 @@
       description: "Un t-shirt basique présenté comme exemple fictif.",
       image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "T-shirt posé à plat",
-      offers: [{ seller: "Vendeur fictif A", price: 18 }, { seller: "Vendeur fictif B", price: 24 }]
     },
     {
       title: "Sac Urbain",
@@ -968,7 +1394,6 @@
       description: "Un sac à dos pratique pour les trajets quotidiens.",
       image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Sac à dos de ville",
-      offers: [{ seller: "Vendeur fictif A", price: 42 }, { seller: "Vendeur fictif B", price: 55 }]
     },
     {
       title: "Pull Coton",
@@ -977,7 +1402,6 @@
       description: "Un pull doux de démonstration pour les journées fraîches.",
       image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Vêtement en maille photographié de près",
-      offers: [{ seller: "Vendeur fictif A", price: 58 }, { seller: "Vendeur fictif B", price: 69 }]
     },
     {
       title: "Mug Studio",
@@ -986,7 +1410,6 @@
       description: "Un mug en céramique pour compléter la sélection maison.",
       image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Tasses en céramique posées sur une table",
-      offers: [{ seller: "Vendeur fictif A", price: 12 }, { seller: "Vendeur fictif B", price: 17 }]
     },
     {
       title: "Plante Calathea",
@@ -995,7 +1418,6 @@
       description: "Une plante d’intérieur pour apporter une touche de vert.",
       image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Plante verte d’intérieur dans un pot",
-      offers: [{ seller: "Vendeur fictif A", price: 28 }, { seller: "Vendeur fictif B", price: 36 }]
     },
     {
       title: "Coussin Mousse",
@@ -1004,7 +1426,6 @@
       description: "Un coussin décoratif doux dans des tons naturels.",
       image: "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Coussin décoratif dans un salon",
-      offers: [{ seller: "Vendeur fictif A", price: 24 }, { seller: "Vendeur fictif B", price: 32 }]
     },
     {
       title: "Étagère Lino",
@@ -1013,265 +1434,153 @@
       description: "Une petite étagère de démonstration pour le rangement.",
       image: "https://images.unsplash.com/photo-1594620302200-9a762244a156?auto=format&fit=crop&w=1000&q=82",
       imageAlt: "Étagère et mobilier dans un intérieur",
-      offers: [{ seller: "Vendeur fictif A", price: 119 }, { seller: "Vendeur fictif B", price: 139 }]
-    },
-    ];
-
-    const markets = [
-      { code: "FR", name: "France", flag: "🇫🇷", language: "fr", currency: "EUR" },
-      { code: "BE", name: "Belgique", flag: "🇧🇪", language: "fr", currency: "EUR" },
-      { code: "DE", name: "Allemagne", flag: "🇩🇪", language: "de", currency: "EUR" },
-      { code: "ES", name: "Espagne", flag: "🇪🇸", language: "es", currency: "EUR" },
-      { code: "IT", name: "Italie", flag: "🇮🇹", language: "it", currency: "EUR" },
-      { code: "GB", name: "Royaume-Uni", flag: "🇬🇧", language: "en", currency: "GBP" },
-      { code: "US", name: "États-Unis", flag: "🇺🇸", language: "en", currency: "USD" },
-      { code: "CA", name: "Canada", flag: "🇨🇦", language: "en", currency: "CAD" }
-    ];
+    },      {
+        title: "Roman Les heures dorées",
+        category: "culture",
+        categoryLabel: "Culture",
+        description: "Un roman fictif pour ralentir et s’évader quelques chapitres.",
+        image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Livre ouvert photographié dans une lumière douce",
+      },
+      {
+        title: "BD Cosmos",
+        category: "culture",
+        categoryLabel: "Culture",
+        description: "Une bande dessinée imaginaire au fil d’une aventure spatiale.",
+        image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Livres illustrés empilés sur une table",
+      },
+      {
+        title: "Vinyle Soleil",
+        category: "culture",
+        categoryLabel: "Culture",
+        description: "Un disque de collection inventé pour cette sélection.",
+        image: "https://images.unsplash.com/photo-1461360228754-6e81c478b882?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Ambiance musicale avec un disque vinyle",
+      },
+      {
+        title: "Appareil photo Argent",
+        category: "culture",
+        categoryLabel: "Culture",
+        description: "Un appareil photo fictif pour garder les souvenirs.",
+        image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Appareil photo sur un fond neutre",
+      },
+      {
+        title: "Manette Pixel",
+        category: "gaming",
+        categoryLabel: "Gaming",
+        description: "Une manette sans fil imaginaire pour les soirées jeu.",
+        image: "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Manette de jeu sur un bureau",
+      },
+      {
+        title: "Console portable Nomade",
+        category: "gaming",
+        categoryLabel: "Gaming",
+        description: "Une console portable inventée pour la démo.",
+        image: "https://images.unsplash.com/photo-1606146481926-5b25eaa7a89b?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Console de jeu portable",
+      },
+      {
+        title: "Casque Arcade",
+        category: "gaming",
+        categoryLabel: "Gaming",
+        description: "Un casque audio fictif pour jouer et écouter de la musique.",
+        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Casque audio photographié sur une table",
+      },
+      {
+        title: "Tapis Flow",
+        category: "sport",
+        categoryLabel: "Sport",
+        description: "Un tapis de sport fictif pour les étirements à la maison.",
+        image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Accessoires de yoga dans un studio lumineux",
+      },
+      {
+        title: "Gourde Nomade",
+        category: "sport",
+        categoryLabel: "Sport",
+        description: "Une gourde réutilisable inventée pour les sorties.",
+        image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Gourde réutilisable en acier",
+      },
+      {
+        title: "Sac Trek",
+        category: "sport",
+        categoryLabel: "Sport",
+        description: "Un sac de randonnée fictif pour partir le temps d’un week-end.",
+        image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Sac à dos de voyage posé en extérieur",
+      },
+      {
+        title: "Vélo City",
+        category: "sport",
+        categoryLabel: "Sport",
+        description: "Un vélo urbain fictif pour les trajets du quotidien.",
+        image: "https://images.unsplash.com/photo-1485965120184-67a4a3e1a1f7?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Vélo photographié sur un fond clair",
+      },
+      {
+        title: "Ballon Tempo",
+        category: "sport",
+        categoryLabel: "Sport",
+        description: "Un ballon de football de démonstration pour jouer dehors.",
+        image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Ballon de football posé sur le terrain",
+      },    ];
+    const MAX_FEED_ITEMS = 1000000000;
+    const BATCH_SIZE = 24;
     const productGrid = document.getElementById("productGrid");
     const resultCount = document.getElementById("resultCount");
+    const searchForm = document.getElementById("searchForm");
     const searchInput = document.getElementById("searchInput");
-    const sortSelect = document.getElementById("sortSelect");
     const filterButtons = Array.from(document.querySelectorAll("[data-filter]"));
-    const marketButtonsElement = document.getElementById("marketButtons");
-    const marketResults = document.getElementById("marketResults");
-    const marketResultTitle = document.getElementById("marketResultTitle");
-    const marketResultNote = document.getElementById("marketResultNote");
-    const cheapestSummary = document.getElementById("cheapestSummary");
-    const marketGrid = document.getElementById("marketGrid");
-    const selectedMarkets = new Set(markets.map(market => market.code));
-    let marketQuery = "";
+    const feedStatus = document.getElementById("feedStatus");
+    const loadMoreButton = document.getElementById("loadMoreButton");
+    const feedSentinel = document.getElementById("feedSentinel");
+    const categoryGroups = new Map([
+      ["informatique", new Set(["phones", "computing"])],
+      ["culture", new Set(["culture"])],
+      ["mode", new Set(["clothing"])],
+      ["maison", new Set(["home"])],
+      ["sport", new Set(["sport"])],
+      ["gaming", new Set(["gaming"])]
+    ]);
     let activeCategory = "all";
     let searchTerm = "";
+    let activeSeeds = [];
+    let loadedCount = 0;
 
     function normalize(value) {
       return value.toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
 
-    function formatPrice(price) {
-      return new Intl.NumberFormat("fr-FR", {
-        style: "currency",
-        currency: "EUR",
-        maximumFractionDigits: 0
-      }).format(price);
+    function formatCount(value) {
+      return new Intl.NumberFormat("fr-FR").format(value);
     }
 
-    function bestPrice(product) {
-      return Math.min(...product.offers.map(offer => offer.price));
-    }
-
-    function renderMarketButtons() {
-      marketButtonsElement.replaceChildren();
-      markets.forEach(market => {
-        const button = document.createElement("button");
-        button.className = "market-chip";
-        button.type = "button";
-        button.textContent = market.flag + " " + market.name;
-        button.setAttribute("aria-pressed", String(selectedMarkets.has(market.code)));
-        button.addEventListener("click", () => {
-          if (selectedMarkets.has(market.code)) {
-            selectedMarkets.delete(market.code);
-          } else {
-            selectedMarkets.add(market.code);
-          }
-          button.setAttribute("aria-pressed", String(selectedMarkets.has(market.code)));
-          if (marketQuery) marketResultNote.textContent = "Pays modifiés. Relance la recherche pour actualiser la comparaison.";
-        });
-        marketButtonsElement.append(button);
+    function getMatchingSeeds() {
+      const query = normalize(searchTerm.trim());
+      const categoryGroup = categoryGroups.get(activeCategory);
+      return productSeeds.filter(product => {
+        const matchesCategory = activeCategory === "all" || (categoryGroup
+          ? categoryGroup.has(product.category)
+          : product.category === activeCategory);
+        const text = normalize([product.title, product.description, product.categoryLabel].join(" "));
+        return matchesCategory && (!query || text.includes(query));
       });
     }
 
-    let comparisonRequestId = 0;
-
-    function formatEuro(amount) {
-      return new Intl.NumberFormat("fr-FR", {
-        style: "currency",
-        currency: "EUR",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(amount);
-    }
-
-    function appendComparisonEmpty(titleText, messageText) {
-      const empty = document.createElement("div");
-      empty.className = "empty-state";
-      const title = document.createElement("strong");
-      title.textContent = titleText;
-      const message = document.createElement("span");
-      message.textContent = messageText;
-      empty.append(title, message);
-      marketGrid.append(empty);
-    }
-
-    function createMarketCard(result, cheapestCode) {
-      const card = document.createElement("article");
-      card.className = result.code === cheapestCode ? "market-card is-cheapest" : "market-card";
-
-      const heading = document.createElement("div");
-      heading.className = "market-card-heading";
-      const flag = document.createElement("span");
-      flag.className = "market-flag";
-      flag.setAttribute("aria-hidden", "true");
-      flag.textContent = result.flag;
-      const name = document.createElement("span");
-      name.textContent = result.name;
-      heading.append(flag, name);
-      card.append(heading);
-
-      const meta = document.createElement("p");
-      meta.className = "market-card-meta";
-      meta.textContent = "Marché " + result.code;
-      card.append(meta);
-
-      if (result.error || !result.best) {
-        const error = document.createElement("p");
-        error.className = "market-error";
-        error.textContent = result.error || "Aucune offre comparable trouvée.";
-        card.append(error);
-        return card;
-      }
-
-      if (result.code === cheapestCode) {
-        const badge = document.createElement("span");
-        badge.className = "market-cheapest-tag";
-        badge.textContent = "Pays le moins cher";
-        card.append(badge);
-      }
-
-      const euroPrice = document.createElement("p");
-      euroPrice.className = "market-price-main";
-      euroPrice.textContent = formatEuro(result.best.priceEur);
-      card.append(euroPrice);
-
-      const original = document.createElement("p");
-      original.className = "market-original";
-      original.textContent = "Prix affiché : " + result.best.price;
-      card.append(original);
-
-      const product = document.createElement("p");
-      product.className = "market-product-title";
-      product.textContent = result.best.title;
-      card.append(product);
-
-      const seller = document.createElement("p");
-      seller.className = "market-source";
-      seller.textContent = "Vendeur : " + (result.best.source || "vendeur Google Shopping");
-      card.append(seller);
-
-      if (result.best.delivery) {
-        const delivery = document.createElement("p");
-        delivery.className = "market-delivery";
-        delivery.textContent = result.best.delivery;
-        card.append(delivery);
-      }
-
-      if (result.best.link) {
-        try {
-          const offerUrl = new URL(result.best.link);
-          if (offerUrl.protocol === "https:") {
-            const link = document.createElement("a");
-            link.href = offerUrl.toString();
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            link.className = "market-link";
-            link.textContent = "Voir l’offre ↗";
-            link.setAttribute("aria-label", "Voir cette offre chez " + (result.best.source || result.name));
-            card.append(link);
-          }
-        } catch (error) {
-          // An invalid result URL is omitted.
-        }
-      }
-
-      return card;
-    }
-
-    async function renderMarketResults(query) {
-      const requestId = ++comparisonRequestId;
-      marketQuery = query;
-      marketResults.hidden = false;
-      marketResultTitle.textContent = "Comparaison en cours pour « " + query + " »";
-      cheapestSummary.textContent = "Recherche des offres dans les pays sélectionnés…";
-      marketGrid.replaceChildren();
-
-      if (!selectedMarkets.size) {
-        cheapestSummary.textContent = "Choisis au moins un pays.";
-        appendComparisonEmpty("Choisis au moins un pays", "Active un pays au-dessus puis relance la recherche.");
-        return;
-      }
-
-      appendComparisonEmpty("Recherche en cours", "PrixRadar compare les résultats par pays.");
-      const params = new URLSearchParams();
-      params.set("q", query);
-      selectedMarkets.forEach(code => params.append("market", code));
-
-      try {
-        const response = await fetch("/api/compare?" + params.toString(), {
-          headers: { Accept: "application/json" }
-        });
-        const data = await response.json();
-        if (requestId !== comparisonRequestId) return;
-        if (!response.ok) throw new Error(data.error || "Le service de comparaison est indisponible.");
-
-        marketGrid.replaceChildren();
-        marketResultTitle.textContent = "Résultats pour « " + query + " »";
-        if (data.rateDate) {
-          marketResultNote.textContent = "Prix convertis en euros avec le taux de référence du " + data.rateDate + ". Hors livraison, taxes et douane; vérifie le modèle exact.";
-        }
-
-        if (data.cheapest) {
-          cheapestSummary.textContent = "Pays le moins cher : " + data.cheapest.name + " — " + formatEuro(data.cheapest.priceEur);
-        } else {
-          cheapestSummary.textContent = "Aucune offre comparable trouvée. Essaie une recherche plus précise.";
-        }
-
-        if (!data.markets || !data.markets.length) {
-          appendComparisonEmpty("Aucun résultat", "Essaie avec la marque et le modèle complet.");
-          return;
-        }
-        data.markets.forEach(result => marketGrid.append(createMarketCard(result, data.cheapest && data.cheapest.code)));
-      } catch (error) {
-        if (requestId !== comparisonRequestId) return;
-        marketGrid.replaceChildren();
-        marketResultTitle.textContent = "Comparaison indisponible";
-        cheapestSummary.textContent = "La comparaison automatique n’a pas pu démarrer.";
-        const message = error instanceof TypeError
-          ? "Lance start-prixradar.bat puis ouvre PrixRadar depuis localhost."
-          : error.message;
-        appendComparisonEmpty("Vérifie la configuration", message);
-      }
-    }
-    function createOfferRow(offer, index) {
-      const row = document.createElement("div");
-      row.className = "offer-row";
-
-      const seller = document.createElement("div");
-      seller.className = "seller";
-
-      const mark = document.createElement("span");
-      mark.className = "seller-mark";
-      mark.setAttribute("aria-hidden", "true");
-      mark.textContent = index === 0 ? "A" : "B";
-
-      const details = document.createElement("span");
-      details.className = "seller-details";
-
-      const name = document.createElement("span");
-      name.className = "seller-name";
-      name.textContent = offer.seller;
-
-      const label = document.createElement("span");
-      label.className = "seller-label";
-      label.textContent = "Vendeur fictif";
-
-      details.append(name, label);
-      seller.append(mark, details);
-
-      const price = document.createElement("span");
-      price.className = "offer-price";
-      price.textContent = formatPrice(offer.price);
-
-      row.append(seller, price);
-      return row;
+    function createVirtualProduct(index) {
+      const seed = activeSeeds[index % activeSeeds.length];
+      const edition = Math.floor(index / activeSeeds.length) + 1;
+      const title = edition === 1 ? seed.title : seed.title + " · édition fictive " + edition;
+      const description = edition === 1
+        ? seed.description
+        : seed.description + " Variation fictive " + (index + 1) + " du fil.";
+      return { ...seed, title, description, virtualId: index + 1 };
     }
 
     function createProductCard(product) {
@@ -1293,86 +1602,93 @@
       const category = document.createElement("span");
       category.className = "category-tag";
       category.textContent = product.categoryLabel;
-      imageWrap.append(image, category);
+
+      const saveButton = document.createElement("button");
+      saveButton.className = "save-button";
+      saveButton.type = "button";
+      saveButton.textContent = "♡";
+      saveButton.setAttribute("aria-pressed", "false");
+      saveButton.setAttribute("aria-label", "Ajouter " + product.title + " aux favoris");
+      saveButton.addEventListener("click", () => {
+        const saved = saveButton.getAttribute("aria-pressed") === "true";
+        saveButton.setAttribute("aria-pressed", String(!saved));
+        saveButton.classList.toggle("is-saved", !saved);
+        saveButton.textContent = saved ? "♡" : "♥";
+        saveButton.setAttribute("aria-label", saved
+          ? "Ajouter " + product.title + " aux favoris"
+          : "Retirer " + product.title + " des favoris");
+      });
+
+      imageWrap.append(image, category, saveButton);
 
       const body = document.createElement("div");
       body.className = "card-body";
-
       const title = document.createElement("h3");
       title.className = "product-title";
       title.textContent = product.title;
-
       const description = document.createElement("p");
       description.className = "product-description";
       description.textContent = product.description;
-
-      const offers = document.createElement("div");
-      offers.className = "offers";
-
-      const offersHead = document.createElement("div");
-      offersHead.className = "offers-head";
-
-      const offersLabel = document.createElement("span");
-      offersLabel.textContent = "Offres fictives";
-
-      const offersCount = document.createElement("span");
-      offersCount.textContent = product.offers.length + " vendeurs démo";
-
-      offersHead.append(offersLabel, offersCount);
-      offers.append(offersHead);
-
-      const sortedOffers = product.offers.slice().sort((a, b) => a.price - b.price);
-      sortedOffers.forEach((offer, index) => offers.append(createOfferRow(offer, index)));
-
-      body.append(title, description, offers);
+      body.append(title, description);
       card.append(imageWrap, body);
       return card;
     }
 
-    function render() {
-      const query = normalize(searchTerm.trim());
-      const visibleProducts = products.filter(product => {
-        const matchesCategory = activeCategory === "all" || product.category === activeCategory;
-        const searchableText = normalize([
-          product.title,
-          product.description,
-          product.categoryLabel,
-          ...product.offers.map(offer => offer.seller)
-        ].join(" "));
-        return matchesCategory && (!query || searchableText.includes(query));
-      });
-
-      const direction = sortSelect.value === "descending" ? -1 : 1;
-      visibleProducts.sort((a, b) => direction * (bestPrice(a) - bestPrice(b)));
-
-      resultCount.textContent = visibleProducts.length + (visibleProducts.length > 1 ? " produits fictifs" : " produit fictif");
-      productGrid.replaceChildren();
-
-      if (!visibleProducts.length) {
-        const empty = document.createElement("div");
-        empty.className = "empty-state";
-        const title = document.createElement("strong");
-        title.textContent = "Aucun exemple local correspondant";
-        const message = document.createElement("span");
-        message.textContent = "Les résultats Google Shopping par pays restent disponibles au-dessus.";
-        empty.append(title, message);
-        productGrid.append(empty);
-        return;
-      }
-
-      visibleProducts.forEach(product => productGrid.append(createProductCard(product)));
+    function updateCount() {
+      resultCount.textContent = formatCount(MAX_FEED_ITEMS) +
+        " variantes fictives possibles · " + activeSeeds.length +
+        " modèles visuels dans cette sélection";
     }
 
-    document.getElementById("searchForm").addEventListener("submit", event => {
+    function showEmptyState() {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      const title = document.createElement("strong");
+      title.textContent = "Aucune idée trouvée";
+      const message = document.createElement("span");
+      message.textContent = "Essaie un autre mot ou choisis une autre catégorie.";
+      empty.append(title, message);
+      productGrid.append(empty);
+      feedStatus.textContent = "Modifie ta recherche ou change de catégorie pour reprendre le fil.";
+      loadMoreButton.hidden = true;
+    }
+
+    function loadMore() {
+      if (!activeSeeds.length || loadedCount >= MAX_FEED_ITEMS) return;
+      const amount = Math.min(BATCH_SIZE, MAX_FEED_ITEMS - loadedCount);
+      const fragment = document.createDocumentFragment();
+      for (let offset = 0; offset < amount; offset += 1) {
+        fragment.append(createProductCard(createVirtualProduct(loadedCount + offset)));
+      }
+      productGrid.append(fragment);
+      loadedCount += amount;
+      feedStatus.textContent = formatCount(loadedCount) + " / " +
+        formatCount(MAX_FEED_ITEMS) + " variantes fictives générées";
+      loadMoreButton.hidden = loadedCount >= MAX_FEED_ITEMS;
+      if (loadedCount >= MAX_FEED_ITEMS) {
+        feedStatus.textContent = "Toutes les variantes fictives prévues pour ce fil ont été générées.";
+      }
+    }
+
+    function resetFeed() {
+      activeSeeds = getMatchingSeeds();
+      loadedCount = 0;
+      productGrid.replaceChildren();
+      updateCount();
+      if (!activeSeeds.length) {
+        showEmptyState();
+        return;
+      }
+      loadMoreButton.hidden = false;
+      loadMore();
+    }
+
+    searchForm.addEventListener("submit", event => {
       event.preventDefault();
       searchTerm = searchInput.value.trim();
-      if (!searchTerm) return;
-      render();
-      renderMarketResults(searchTerm);
+      resetFeed();
+      document.querySelector(".catalog-head").scrollIntoView({ behavior: "smooth", block: "start" });
     });
-
-
-    sortSelect.addEventListener("change", render);
 
     filterButtons.forEach(button => {
       button.addEventListener("click", () => {
@@ -1380,12 +1696,99 @@
         filterButtons.forEach(filter => {
           filter.setAttribute("aria-pressed", String(filter === button));
         });
-        render();
+        resetFeed();
       });
     });
 
-    renderMarketButtons();
-    render();
+    loadMoreButton.addEventListener("click", loadMore);
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) loadMore();
+      }, { rootMargin: "850px 0px" });
+      observer.observe(feedSentinel);
+    }
+
+    resetFeed();
+  </script>
+  <button class="play-orb" id="playOrb" type="button" aria-label="Boule orange interactive : clique pour la faire briller, fais-la glisser pour la déplacer" aria-pressed="false" title="Attrape la boule pour la déplacer">
+    <span class="play-orb-ring" aria-hidden="true"></span>
+    <span class="play-orb-core" aria-hidden="true"><span class="play-orb-shine"></span></span>
+  </button>
+  <script>
+    (() => {
+      const orb = document.getElementById("playOrb");
+      if (!orb) return;
+      let dragging = false;
+      let moved = false;
+      let suppressClick = false;
+      let startX = 0;
+      let startY = 0;
+      let startLeft = 0;
+      let startTop = 0;
+
+      orb.addEventListener("pointerdown", event => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        dragging = true;
+        moved = false;
+        startX = event.clientX;
+        startY = event.clientY;
+        const rect = orb.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        orb.style.left = startLeft + "px";
+        orb.style.top = startTop + "px";
+        orb.style.right = "auto";
+        orb.style.bottom = "auto";
+        orb.classList.add("is-dragging");
+        try { orb.setPointerCapture(event.pointerId); } catch {}
+      });
+
+      orb.addEventListener("pointermove", event => {
+        if (!dragging) return;
+        const dx = event.clientX - startX;
+        const dy = event.clientY - startY;
+        if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+        if (!moved) return;
+        const maxLeft = Math.max(8, window.innerWidth - orb.offsetWidth - 8);
+        const maxTop = Math.max(8, window.innerHeight - orb.offsetHeight - 8);
+        const left = Math.max(8, Math.min(maxLeft, startLeft + dx));
+        const top = Math.max(8, Math.min(maxTop, startTop + dy));
+        orb.style.left = left + "px";
+        orb.style.top = top + "px";
+      });
+
+      const endDrag = event => {
+        if (!dragging) return;
+        dragging = false;
+        orb.classList.remove("is-dragging");
+        if (moved) {
+          suppressClick = true;
+          window.setTimeout(() => { suppressClick = false; }, 250);
+        }
+        try { if (orb.hasPointerCapture(event.pointerId)) orb.releasePointerCapture(event.pointerId); } catch {}
+      };
+      orb.addEventListener("pointerup", endDrag);
+      orb.addEventListener("pointercancel", endDrag);
+      orb.addEventListener("click", () => {
+        if (suppressClick) { suppressClick = false; return; }
+        const lit = orb.classList.toggle("is-charged");
+        orb.setAttribute("aria-pressed", String(lit));
+      });
+      orb.addEventListener("keydown", event => {
+        const steps = { ArrowUp: [0, -18], ArrowDown: [0, 18], ArrowLeft: [-18, 0], ArrowRight: [18, 0] };
+        const step = steps[event.key];
+        if (!step) return;
+        event.preventDefault();
+        const rect = orb.getBoundingClientRect();
+        const left = Math.max(8, Math.min(window.innerWidth - orb.offsetWidth - 8, rect.left + step[0]));
+        const top = Math.max(8, Math.min(window.innerHeight - orb.offsetHeight - 8, rect.top + step[1]));
+        orb.style.left = left + "px";
+        orb.style.top = top + "px";
+        orb.style.right = "auto";
+        orb.style.bottom = "auto";
+      });
+    })();
   </script>
 </body>
 </html>
