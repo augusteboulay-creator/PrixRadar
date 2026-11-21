@@ -1198,12 +1198,13 @@
       </div>
       <h1>Défile, découvre,<br><span>collectionne.</span></h1>
       <p class="hero-copy">Des idées dans tous les univers. Parcours le fil, choisis une catégorie et garde tes coups de cœur.</p>
-      <form class="search" id="searchForm" role="search">
+      <form class="search" id="searchForm" role="search" action="https://www.google.com/search" method="get" target="_blank">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input id="searchInput" type="search" placeholder="Ex. roman, baskets, casque…" aria-label="Rechercher une idée">
-        <button type="submit">Explorer</button>
+        <input id="searchInput" name="q" type="search" placeholder="Ex. roman, baskets, casque…" aria-label="Rechercher un produit">
+        <input type="hidden" name="tbm" value="shop">
+        <button type="submit">Google Shopping</button>
       </form>
-      <p class="free-note">Un fil de découverte gratuit · produits de démonstration</p>
+      <p class="free-note">Les résultats réels de Google Shopping apparaîtront dans un nouvel onglet.</p>
     </div>
   </section>
 
@@ -1561,18 +1562,78 @@
       return new Intl.NumberFormat("fr-FR").format(value);
     }
 
-    function getMatchingSeeds() {
-      const query = normalize(searchTerm.trim());
-      const categoryGroup = categoryGroups.get(activeCategory);
-      return productSeeds.filter(product => {
-        const matchesCategory = activeCategory === "all" || (categoryGroup
-          ? categoryGroup.has(product.category)
-          : product.category === activeCategory);
-        const text = normalize([product.title, product.description, product.categoryLabel].join(" "));
-        return matchesCategory && (!query || text.includes(query));
-      });
+    const searchStopWords = new Set(["pro", "max", "plus", "version", "modele", "edition", "produit", "avec"]);
+    const categoryHints = new Map([
+      ["informatique", ["clavier", "ordinateur", "portable", "pc", "telephone", "smartphone", "ecran", "souris", "webcam", "tablette"]],
+      ["culture", ["livre", "roman", "manga", "bd", "vinyle", "musique", "film", "photo", "appareil"]],
+      ["mode", ["basket", "sneaker", "chaussure", "vetement", "tshirt", "veste", "pull", "sac"]],
+      ["maison", ["lampe", "fauteuil", "plante", "mug", "coussin", "etagere", "deco", "maison"]],
+      ["sport", ["sport", "ballon", "velo", "gourde", "yoga", "tapis", "fitness", "running", "foot"]],
+      ["gaming", ["gaming", "jeu", "console", "manette", "gamer", "videogame"]]
+    ]);
+
+    function inferCategory(query) {
+      const text = normalize(query);
+      for (const [category, hints] of categoryHints) {
+        if (hints.some(hint => text.includes(normalize(hint)))) return category;
+      }
+      return null;
     }
 
+    function getMatchingSeeds() {
+      const rawQuery = searchTerm.trim();
+      const query = normalize(rawQuery);
+      const categoryGroup = categoryGroups.get(activeCategory);
+      const categorySeeds = productSeeds.filter(product => activeCategory === "all" ||
+        (categoryGroup ? categoryGroup.has(product.category) : product.category === activeCategory));
+      if (!query) return categorySeeds;
+
+      const tokens = query.split(/\s+/).filter(token =>
+        token.length > 2 && !searchStopWords.has(token) && !/^\d+$/.test(token));
+      const ranked = categorySeeds.map(product => {
+        const title = normalize(product.title);
+        const description = normalize(product.description);
+        const category = normalize(product.categoryLabel);
+        const score = tokens.reduce((total, token) => {
+          if (title.includes(token)) return total + 8;
+          if (category.includes(token)) return total + 5;
+          if (description.includes(token)) return total + 2;
+          return total;
+        }, 0);
+        return { product, score };
+      }).filter(result => result.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map(result => result.product);
+
+      if (ranked.length) {
+        if (tokens.length > 1 && normalize(ranked[0].title) !== query) {
+          const querySeed = {
+            ...ranked[0],
+            title: rawQuery,
+            description: "Fiche d’inspiration fictive générée à partir de ta recherche. Ce n’est pas un produit réel.",
+            isSearchGenerated: true
+          };
+          return [querySeed, ...ranked.slice(0, 7)];
+        }
+        return ranked.slice(0, 24);
+      }
+
+      let relatedSeeds = categorySeeds;
+      if (activeCategory === "all") {
+        const guessedCategory = inferCategory(rawQuery);
+        const guessedGroup = categoryGroups.get(guessedCategory);
+        if (guessedGroup) relatedSeeds = productSeeds.filter(product => guessedGroup.has(product.category));
+      }
+      if (!relatedSeeds.length) relatedSeeds = productSeeds;
+
+      const querySeed = {
+        ...relatedSeeds[0],
+        title: rawQuery,
+        description: "Fiche d’inspiration fictive générée à partir de ta recherche. Ce n’est pas un produit réel.",
+        isSearchGenerated: true
+      };
+      return [querySeed, ...relatedSeeds.slice(1, 8)];
+    }
     function createVirtualProduct(index) {
       const seed = activeSeeds[index % activeSeeds.length];
       const edition = Math.floor(index / activeSeeds.length) + 1;
@@ -1601,7 +1662,7 @@
 
       const category = document.createElement("span");
       category.className = "category-tag";
-      category.textContent = product.categoryLabel;
+      category.textContent = product.isSearchGenerated ? "Idée fictive" : product.categoryLabel;
 
       const saveButton = document.createElement("button");
       saveButton.className = "save-button";
@@ -1635,11 +1696,17 @@
     }
 
     function updateCount() {
+      const query = searchTerm.trim();
+      if (query) {
+        resultCount.textContent = formatCount(MAX_FEED_ITEMS) +
+          " variantes fictives possibles pour « " + query + " » · " +
+          activeSeeds.length + " modèles utilisés pour inspirer le fil";
+        return;
+      }
       resultCount.textContent = formatCount(MAX_FEED_ITEMS) +
         " variantes fictives possibles · " + activeSeeds.length +
         " modèles visuels dans cette sélection";
     }
-
     function showEmptyState() {
       const empty = document.createElement("div");
       empty.className = "empty-state";
@@ -1683,12 +1750,6 @@
       loadMore();
     }
 
-    searchForm.addEventListener("submit", event => {
-      event.preventDefault();
-      searchTerm = searchInput.value.trim();
-      resetFeed();
-      document.querySelector(".catalog-head").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
 
     filterButtons.forEach(button => {
       button.addEventListener("click", () => {
@@ -1713,82 +1774,4 @@
   </script>
   <button class="play-orb" id="playOrb" type="button" aria-label="Boule orange interactive : clique pour la faire briller, fais-la glisser pour la déplacer" aria-pressed="false" title="Attrape la boule pour la déplacer">
     <span class="play-orb-ring" aria-hidden="true"></span>
-    <span class="play-orb-core" aria-hidden="true"><span class="play-orb-shine"></span></span>
-  </button>
-  <script>
-    (() => {
-      const orb = document.getElementById("playOrb");
-      if (!orb) return;
-      let dragging = false;
-      let moved = false;
-      let suppressClick = false;
-      let startX = 0;
-      let startY = 0;
-      let startLeft = 0;
-      let startTop = 0;
-
-      orb.addEventListener("pointerdown", event => {
-        if (event.pointerType === "mouse" && event.button !== 0) return;
-        dragging = true;
-        moved = false;
-        startX = event.clientX;
-        startY = event.clientY;
-        const rect = orb.getBoundingClientRect();
-        startLeft = rect.left;
-        startTop = rect.top;
-        orb.style.left = startLeft + "px";
-        orb.style.top = startTop + "px";
-        orb.style.right = "auto";
-        orb.style.bottom = "auto";
-        orb.classList.add("is-dragging");
-        try { orb.setPointerCapture(event.pointerId); } catch {}
-      });
-
-      orb.addEventListener("pointermove", event => {
-        if (!dragging) return;
-        const dx = event.clientX - startX;
-        const dy = event.clientY - startY;
-        if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
-        if (!moved) return;
-        const maxLeft = Math.max(8, window.innerWidth - orb.offsetWidth - 8);
-        const maxTop = Math.max(8, window.innerHeight - orb.offsetHeight - 8);
-        const left = Math.max(8, Math.min(maxLeft, startLeft + dx));
-        const top = Math.max(8, Math.min(maxTop, startTop + dy));
-        orb.style.left = left + "px";
-        orb.style.top = top + "px";
-      });
-
-      const endDrag = event => {
-        if (!dragging) return;
-        dragging = false;
-        orb.classList.remove("is-dragging");
-        if (moved) {
-          suppressClick = true;
-          window.setTimeout(() => { suppressClick = false; }, 250);
-        }
-        try { if (orb.hasPointerCapture(event.pointerId)) orb.releasePointerCapture(event.pointerId); } catch {}
-      };
-      orb.addEventListener("pointerup", endDrag);
-      orb.addEventListener("pointercancel", endDrag);
-      orb.addEventListener("click", () => {
-        if (suppressClick) { suppressClick = false; return; }
-        const lit = orb.classList.toggle("is-charged");
-        orb.setAttribute("aria-pressed", String(lit));
-      });
-      orb.addEventListener("keydown", event => {
-        const steps = { ArrowUp: [0, -18], ArrowDown: [0, 18], ArrowLeft: [-18, 0], ArrowRight: [18, 0] };
-        const step = steps[event.key];
-        if (!step) return;
-        event.preventDefault();
-        const rect = orb.getBoundingClientRect();
-        const left = Math.max(8, Math.min(window.innerWidth - orb.offsetWidth - 8, rect.left + step[0]));
-        const top = Math.max(8, Math.min(window.innerHeight - orb.offsetHeight - 8, rect.top + step[1]));
-        orb.style.left = left + "px";
-        orb.style.top = top + "px";
-        orb.style.right = "auto";
-        orb.style.bottom = "auto";
-      });
-    })();
-  </script>
-</body>
-</html>
+    <span class="play-orb-core
