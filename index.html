@@ -1172,6 +1172,35 @@
       .product-image { aspect-ratio: 1.1 / 1 !important; }
       .catalog-head { align-items: flex-start; }
     }
+    .feed-return {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border: 1px solid #684630;
+      border-radius: 999px;
+      color: #ffd5b3;
+      background: rgba(255, 139, 56, .1);
+      font-size: 12px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .feed-return:hover { border-color: #f18f50; background: rgba(255, 139, 56, .2); }
+    .google-product-price { margin: 12px 0 5px; color: #ffad70; font-size: 20px; font-weight: 850; letter-spacing: -.4px; }
+    .google-product-meta { margin: 5px 0; color: #b9aaa0; font-size: 11px; line-height: 1.5; }
+    .google-product-link {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 10px;
+      padding: 9px 12px;
+      border: 1px solid rgba(255, 169, 106, .3);
+      border-radius: 10px;
+      color: #ffd5b3;
+      background: rgba(255, 139, 56, .11);
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .google-product-link:hover { border-color: #f18f50; background: rgba(255, 139, 56, .2); }
+    .product-grid[aria-busy="true"] { opacity: .58; }
   </style>
 </head>
 <body>
@@ -1198,13 +1227,13 @@
       </div>
       <h1>Défile, découvre,<br><span>collectionne.</span></h1>
       <p class="hero-copy">Des idées dans tous les univers. Parcours le fil, choisis une catégorie et garde tes coups de cœur.</p>
-      <form class="search" id="searchForm" role="search" action="https://www.google.com/search" method="get" target="_blank">
+      <form class="search" id="searchForm" role="search">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input id="searchInput" name="q" type="search" placeholder="Ex. roman, baskets, casque…" aria-label="Rechercher un produit">
-        <input type="hidden" name="tbm" value="shop">
-        <button type="submit">Google Shopping</button>
+        <input id="searchInput" name="q" type="search" required placeholder="Ex. roman, baskets, casque…" aria-label="Rechercher un produit">
+        
+        <button type="submit">Rechercher</button>
       </form>
-      <p class="free-note">Les résultats réels de Google Shopping apparaîtront dans un nouvel onglet.</p>
+      <p class="free-note">Recherche Google Shopping · fiches produits affichées ici</p>
     </div>
   </section>
 
@@ -1212,8 +1241,9 @@
     <div class="catalog-head">
       <div>
         <p class="section-kicker">Le fil PrixRadar</p>
-        <h2>À toi de découvrir</h2>
+        <h2 id="catalogTitle">À toi de découvrir</h2>
         <p class="count" id="resultCount" aria-live="polite"></p>
+        <button class="feed-return" id="returnToFeedButton" type="button" hidden>Revenir au fil</button>
       </div>
     </div>
 
@@ -1535,6 +1565,8 @@
     const BATCH_SIZE = 24;
     const productGrid = document.getElementById("productGrid");
     const resultCount = document.getElementById("resultCount");
+    const catalogTitle = document.getElementById("catalogTitle");
+    const returnToFeedButton = document.getElementById("returnToFeedButton");
     const searchForm = document.getElementById("searchForm");
     const searchInput = document.getElementById("searchInput");
     const filterButtons = Array.from(document.querySelectorAll("[data-filter]"));
@@ -1553,6 +1585,8 @@
     let searchTerm = "";
     let activeSeeds = [];
     let loadedCount = 0;
+    let liveSearchActive = false;
+    let googleSearchRequestId = 0;
 
     function normalize(value) {
       return value.toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -1695,83 +1729,52 @@
       return card;
     }
 
-    function updateCount() {
-      const query = searchTerm.trim();
-      if (query) {
-        resultCount.textContent = formatCount(MAX_FEED_ITEMS) +
-          " variantes fictives possibles pour « " + query + " » · " +
-          activeSeeds.length + " modèles utilisés pour inspirer le fil";
-        return;
+    function createGoogleProductCard(product) {
+      const card = document.createElement("article");
+      card.className = "card google-product-card";
+
+      const imageWrap = document.createElement("div");
+      imageWrap.className = "product-image";
+      if (product.image) {
+        const image = document.createElement("img");
+        image.src = product.image;
+        image.alt = product.title;
+        image.loading = "lazy";
+        image.onerror = () => {
+          imageWrap.classList.add("image-fallback");
+          image.remove();
+        };
+        imageWrap.append(image);
+      } else {
+        imageWrap.classList.add("image-fallback");
       }
-      resultCount.textContent = formatCount(MAX_FEED_ITEMS) +
-        " variantes fictives possibles · " + activeSeeds.length +
-        " modèles visuels dans cette sélection";
-    }
-    function showEmptyState() {
-      const empty = document.createElement("div");
-      empty.className = "empty-state";
-      const title = document.createElement("strong");
-      title.textContent = "Aucune idée trouvée";
-      const message = document.createElement("span");
-      message.textContent = "Essaie un autre mot ou choisis une autre catégorie.";
-      empty.append(title, message);
-      productGrid.append(empty);
-      feedStatus.textContent = "Modifie ta recherche ou change de catégorie pour reprendre le fil.";
-      loadMoreButton.hidden = true;
-    }
 
-    function loadMore() {
-      if (!activeSeeds.length || loadedCount >= MAX_FEED_ITEMS) return;
-      const amount = Math.min(BATCH_SIZE, MAX_FEED_ITEMS - loadedCount);
-      const fragment = document.createDocumentFragment();
-      for (let offset = 0; offset < amount; offset += 1) {
-        fragment.append(createProductCard(createVirtualProduct(loadedCount + offset)));
+      const tag = document.createElement("span");
+      tag.className = "category-tag";
+      tag.textContent = "Google Shopping";
+      imageWrap.append(tag);
+
+      const body = document.createElement("div");
+      body.className = "card-body";
+      const title = document.createElement("h3");
+      title.className = "product-title";
+      title.textContent = product.title;
+      body.append(title);
+
+      const price = document.createElement("p");
+      price.className = "google-product-price";
+      price.textContent = product.price || "Prix non indiqué";
+      body.append(price);
+
+      if (product.source) {
+        const source = document.createElement("p");
+        source.className = "google-product-meta";
+        source.textContent = "Vendeur : " + product.source;
+        body.append(source);
       }
-      productGrid.append(fragment);
-      loadedCount += amount;
-      feedStatus.textContent = formatCount(loadedCount) + " / " +
-        formatCount(MAX_FEED_ITEMS) + " variantes fictives générées";
-      loadMoreButton.hidden = loadedCount >= MAX_FEED_ITEMS;
-      if (loadedCount >= MAX_FEED_ITEMS) {
-        feedStatus.textContent = "Toutes les variantes fictives prévues pour ce fil ont été générées.";
-      }
-    }
 
-    function resetFeed() {
-      activeSeeds = getMatchingSeeds();
-      loadedCount = 0;
-      productGrid.replaceChildren();
-      updateCount();
-      if (!activeSeeds.length) {
-        showEmptyState();
-        return;
-      }
-      loadMoreButton.hidden = false;
-      loadMore();
-    }
-
-
-    filterButtons.forEach(button => {
-      button.addEventListener("click", () => {
-        activeCategory = button.dataset.filter;
-        filterButtons.forEach(filter => {
-          filter.setAttribute("aria-pressed", String(filter === button));
-        });
-        resetFeed();
-      });
-    });
-
-    loadMoreButton.addEventListener("click", loadMore);
-
-    if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver(entries => {
-        if (entries.some(entry => entry.isIntersecting)) loadMore();
-      }, { rootMargin: "850px 0px" });
-      observer.observe(feedSentinel);
-    }
-
-    resetFeed();
-  </script>
-  <button class="play-orb" id="playOrb" type="button" aria-label="Boule orange interactive : clique pour la faire briller, fais-la glisser pour la déplacer" aria-pressed="false" title="Attrape la boule pour la déplacer">
-    <span class="play-orb-ring" aria-hidden="true"></span>
-    <span class="play-orb-core
+      if (product.rating != null && Number.isFinite(Number(product.rating))) {
+        const rating = document.createElement("p");
+        rating.className = "google-product-meta";
+        rating.textContent = Number(product.rating).toFixed(1) + " ★";
+        if (product.reviews != null && Number.isFinite(Number(product.reviews)) && Number(product.reviews) >
