@@ -2,7 +2,7 @@
   "name": "prixradar",
   "version": "1.0.0",
   "private": true,
-  "description": "Comparateur de prix par pays pour PrixRadar",
+  "description": "Recherche de produits Google Shopping pour PrixRadar",
   "engines": { "node": ">=20" },
   "scripts": { "start": "node server.js" }
 }
