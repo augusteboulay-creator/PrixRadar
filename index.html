@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f6f8f7">
+  <meta name="theme-color" content="#fff8f2">
   <title>PrixRadar — Comparateur de prix</title>
   <style>
     :root {
@@ -501,6 +501,220 @@
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+
+    /* Theme orange chaleureux et animations discretes */
+    :root {
+      --ink: #302119;
+      --muted: #806b5f;
+      --green: #ef7926;
+      --green-dark: #c65412;
+      --mint: #fff0e3;
+      --line: #efdfd3;
+      --paper: #fffefc;
+      --canvas: #fff9f4;
+      --shadow: 0 20px 54px rgba(126, 58, 17, .13);
+    }
+    body {
+      background:
+        radial-gradient(circle at 7% 12%, rgba(255, 176, 111, .17), transparent 25rem),
+        radial-gradient(circle at 93% 53%, rgba(255, 203, 139, .13), transparent 29rem),
+        var(--canvas);
+    }
+    .topbar { position: relative; }
+    .brand-mark {
+      background: linear-gradient(135deg, #ffa34f, #eb681b 75%);
+      box-shadow: 0 8px 21px rgba(231, 101, 25, .28);
+      animation: mark-breathe 4s ease-in-out infinite;
+    }
+    .status-dot {
+      background: #f28a3c;
+      box-shadow: 0 0 0 4px #fff0e2;
+      animation: status-pulse 2.7s ease-in-out infinite;
+    }
+    .hero {
+      isolation: isolate;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, .88), transparent 38%),
+        linear-gradient(135deg, #fff0e3 0%, #fff9f4 55%, #fff1e4 100%);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      top: 7%;
+      left: max(2%, calc((100vw - 1160px) / 2 - 34px));
+      width: clamp(130px, 18vw, 220px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 27%, #fff 0 3%, #ffe3bd 15%, #ffb36d 42%, rgba(242, 122, 36, .13) 72%, transparent 73%);
+      filter: blur(.3px);
+      opacity: .72;
+      pointer-events: none;
+      animation: orb-float 8s ease-in-out infinite;
+    }
+    .hero::after {
+      top: 7%;
+      right: max(1%, calc((100vw - 1160px) / 2 - 42px));
+      bottom: auto;
+      width: clamp(210px, 28vw, 345px);
+      height: clamp(210px, 28vw, 345px);
+      border: 1px solid rgba(231, 106, 25, .18);
+      box-shadow: 0 0 0 24px rgba(242, 122, 36, .045), 0 0 0 52px rgba(242, 122, 36, .025);
+      animation: ring-drift 24s linear infinite;
+    }
+    .hero-inner { animation: rise-in .7s cubic-bezier(.2, .7, .25, 1) both; }
+    .eyebrow {
+      border-color: rgba(231, 106, 25, .2);
+      color: #a94712;
+      background: rgba(255, 255, 255, .78);
+      box-shadow: 0 5px 18px rgba(126, 58, 17, .045);
+    }
+    h1 span {
+      color: #eb681b;
+      background: linear-gradient(90deg, #f49536, #dc5512);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-copy, .top-note, .market-picker-title { color: #73594a; }
+    .search {
+      border-color: rgba(219, 119, 53, .2);
+      border-radius: 17px;
+      box-shadow: 0 16px 42px rgba(126, 58, 17, .11);
+      transition: box-shadow .22s ease, border-color .22s ease, transform .22s ease;
+    }
+    .search:focus-within {
+      border-color: #f0a16a;
+      box-shadow: 0 0 0 4px rgba(242, 122, 36, .1), 0 18px 45px rgba(126, 58, 17, .12);
+      transform: translateY(-2px);
+    }
+    .search button {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #fa9638, #e75d15);
+      box-shadow: 0 6px 15px rgba(222, 88, 19, .2);
+      transition: filter .2s ease, transform .2s ease, box-shadow .2s ease;
+    }
+    .search button:hover {
+      background: linear-gradient(135deg, #ff9f45, #d94e0f);
+      box-shadow: 0 9px 19px rgba(222, 88, 19, .27);
+      transform: translateY(-2px);
+    }
+    .search button:focus-visible, .filter:focus-visible, select:focus-visible,
+    .market-link:focus-visible {
+      outline-color: rgba(242, 122, 36, .35);
+    }
+    .market-chip {
+      border-color: #f0dccb;
+      color: #765d4d;
+      background: rgba(255, 255, 255, .78);
+      transition: transform .2s ease, box-shadow .2s ease, color .2s ease, background .2s ease;
+    }
+    .market-chip:hover { border-color: #edaa78; color: #b64d13; transform: translateY(-2px); }
+    .market-chip[aria-pressed="true"] {
+      border-color: transparent;
+      color: white;
+      background: linear-gradient(135deg, #f99a40, #e45b14);
+      box-shadow: 0 5px 14px rgba(222, 88, 19, .18);
+    }
+    .market-results {
+      border-color: #f0e0d3;
+      border-radius: 20px;
+      box-shadow: 0 14px 42px rgba(126, 58, 17, .07);
+    }
+    .market-card {
+      border-color: #f0e3da;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #fffefd, #fffaf5);
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .market-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(126, 58, 17, .08); }
+    .market-card.is-cheapest {
+      border-color: #f3ae79;
+      background: linear-gradient(145deg, #fff8f0, #ffefe0);
+      box-shadow: 0 0 0 2px rgba(242, 122, 36, .09);
+    }
+    .cheapest-summary {
+      border: 1px solid #f4dfcb;
+      color: #774a31;
+      background: linear-gradient(100deg, #fff3e6, #fffaf5);
+    }
+    .market-cheapest-tag { color: #a44310; background: #ffe1c5; }
+    .market-price-main, .market-converted, .market-link { color: #bd4d12; }
+    .market-link:hover { color: #e8671a; }
+    .section-kicker { color: #dc641d; }
+    .sort-wrap { color: #765d4d; }
+    .sort-wrap select, .market-price-input, .market-currency-select {
+      border-color: #ecdccc;
+      border-radius: 11px;
+      background-color: #fffdfa;
+    }
+    .filters { padding-top: 5px; }
+    .filter {
+      border-color: #eedfd3;
+      color: #765d4d;
+      transition: transform .18s ease, box-shadow .18s ease, color .18s ease, background .18s ease;
+    }
+    .filter:hover { border-color: #eda873; color: #b64d13; transform: translateY(-2px); }
+    .filter[aria-pressed="true"] {
+      border-color: transparent;
+      color: white;
+      background: linear-gradient(135deg, #f99a40, #e45b14);
+      box-shadow: 0 5px 14px rgba(222, 88, 19, .17);
+    }
+    .card {
+      border-color: #f0e2d8;
+      border-radius: 20px;
+      box-shadow: 0 9px 28px rgba(126, 58, 17, .06);
+      animation: rise-in .55s both;
+    }
+    .card:nth-child(2) { animation-delay: .06s; }
+    .card:nth-child(3) { animation-delay: .12s; }
+    .card:hover { transform: translateY(-6px) scale(1.008); box-shadow: 0 18px 38px rgba(126, 58, 17, .13); }
+    .product-image { background: linear-gradient(135deg, #fff0e2, #ffe0bf); }
+    .product-image.image-fallback::after { color: #8b6a55; }
+    .category-tag {
+      color: #a64813;
+      border-color: rgba(255, 255, 255, .82);
+      background: rgba(255, 250, 245, .92);
+    }
+    .seller-mark { color: #ba4d12; background: #fff0e3; }
+    .demo-banner {
+      border-color: #f0dcc8;
+      color: #755640;
+      background: linear-gradient(100deg, #fff1e3, #fffaf5);
+    }
+    .empty-state { border-color: #edcfb8; background: rgba(255, 252, 248, .82); }
+    footer { border-color: #efe0d4; color: #806b5f; background: #fff4ea; }
+
+    @keyframes orb-float {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(16px, 13px, 0) scale(1.045); }
+    }
+    @keyframes ring-drift {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes rise-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes status-pulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(242, 138, 60, .14); }
+      50% { box-shadow: 0 0 0 7px rgba(242, 138, 60, .05); }
+    }
+    @keyframes mark-breathe {
+      0%, 100% { box-shadow: 0 8px 21px rgba(231, 101, 25, .22); }
+      50% { box-shadow: 0 9px 26px rgba(231, 101, 25, .36); }
+    }
+    @media (max-width: 600px) {
+      .hero::before { left: -64px; top: 15%; opacity: .38; }
+      .hero::after { right: -110px; top: 4%; opacity: .52; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
     }
   </style>
 </head>
