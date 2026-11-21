@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: prixradar
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: SERPAPI_KEY
+        sync: false

@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f8f7">
+  <title>PrixRadar — Comparateur de prix</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b3a;
+      --muted: #71818b;
+      --green: #07886d;
+      --green-dark: #066c58;
+      --mint: #e5f5ef;
+      --line: #e6ece9;
+      --paper: #ffffff;
+      --canvas: #f5f8f6;
+      --shadow: 0 18px 52px rgba(27, 57, 48, .08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select { font: inherit; }
+    button, select { -webkit-tap-highlight-color: transparent; }
+
+    .topbar {
+      width: min(1160px, calc(100% - 48px));
+      height: 82px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--ink);
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -.7px;
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 37px;
+      height: 37px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: white;
+      background: var(--green);
+      box-shadow: 0 6px 14px rgba(7, 136, 109, .2);
+    }
+    .brand-mark svg { width: 22px; height: 22px; }
+    .brand span span { color: var(--green); }
+    .top-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #536a65;
+      font-size: 13px;
+      font-weight: 650;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #21a67f;
+      box-shadow: 0 0 0 4px #e1f3eb;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 53px 24px 48px;
+      background:
+        radial-gradient(ellipse at 82% 26%, rgba(122, 207, 170, .19), transparent 27%),
+        linear-gradient(135deg, #eaf5ef 0%, #f5f8f6 65%);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 230px;
+      height: 230px;
+      right: max(5%, calc((100vw - 1160px) / 2 + 32px));
+      bottom: -154px;
+      border: 1px solid rgba(7, 136, 109, .12);
+      border-radius: 50%;
+      box-shadow: 0 0 0 24px rgba(7, 136, 109, .025), 0 0 0 48px rgba(7, 136, 109, .02);
+      pointer-events: none;
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      width: min(790px, 100%);
+      margin: 0 auto;
+      text-align: center;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border: 1px solid #d5e9df;
+      border-radius: 999px;
+      color: var(--green-dark);
+      background: rgba(255,255,255,.7);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .eyebrow svg { width: 14px; height: 14px; }
+    h1 {
+      max-width: 720px;
+      margin: 17px auto 12px;
+      font-size: clamp(36px, 5.8vw, 59px);
+      line-height: 1.04;
+      letter-spacing: -2.8px;
+    }
+    h1 span { color: var(--green); }
+    .hero-copy {
+      max-width: 590px;
+      margin: 0 auto;
+      color: #5e726c;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    .search {
+      display: flex;
+      width: min(650px, 100%);
+      margin: 27px auto 0;
+      padding: 6px;
+      border: 1px solid #e7ede9;
+      border-radius: 15px;
+      background: white;
+      box-shadow: 0 12px 35px rgba(27, 57, 48, .1);
+    }
+    .search-icon {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 auto;
+      align-self: center;
+      margin-left: 13px;
+      color: #8b9b95;
+    }
+    .search input {
+      width: 100%;
+      min-width: 0;
+      padding: 12px 13px;
+      border: 0;
+      outline: 0;
+      color: var(--ink);
+      background: transparent;
+      font-size: 15px;
+    }
+    .search input::placeholder { color: #9ba9a4; }
+    .search button {
+      flex: 0 0 auto;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 10px;
+      color: white;
+      background: var(--green);
+      font-size: 14px;
+      font-weight: 750;
+      cursor: pointer;
+      transition: background .18s ease, transform .18s ease;
+    }
+    .search button:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .search button:focus-visible, .filter:focus-visible, select:focus-visible {
+      outline: 3px solid rgba(7, 136, 109, .28);
+      outline-offset: 2px;
+    }
+    .market-picker { margin-top: 21px; }
+    .market-picker-title { margin: 0 0 9px; color: #536a65; font-size: 12px; font-weight: 750; }
+    .market-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 760px; margin: 0 auto; }
+    .market-chip { padding: 8px 11px; border: 1px solid #d8e7df; border-radius: 999px; color: #60716a; background: rgba(255,255,255,.72); font-size: 12px; font-weight: 700; cursor: pointer; transition: all .16s ease; }
+    .market-chip:hover { border-color: #9acbb5; color: var(--green-dark); }
+    .market-chip[aria-pressed="true"] { border-color: var(--green); color: white; background: var(--green); }
+    .market-tip { margin: 9px 0 0; color: #83918b; font-size: 11px; }
+    .market-results { margin: 0 0 34px; padding: 23px; border: 1px solid #e4ece7; border-radius: 17px; background: white; box-shadow: 0 9px 28px rgba(27,57,48,.045); }
+    .market-results[hidden] { display: none; }
+    .market-results h2 { margin: 0; }
+    .market-result-note { margin: 8px 0 17px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .market-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .market-card { min-width: 0; padding: 14px; border: 1px solid #e7eeea; border-radius: 13px; background: #fbfdfb; }
+    .market-card.is-cheapest { border-color: #69b99a; background: #f0faf4; box-shadow: 0 0 0 2px rgba(7,136,109,.08); }
+    .cheapest-summary { margin: 8px 0 17px; padding: 12px 14px; border-radius: 11px; color: #536a65; background: #f3f7f4; font-size: 13px; font-weight: 700; line-height: 1.5; }
+    .market-price-label { display: block; margin: 12px 0 0; color: #536a65; font-size: 10px; font-weight: 750; }
+    .market-price-controls { display: flex; gap: 7px; margin-top: 6px; }
+    .market-price-input { width: 100%; min-width: 0; padding: 9px 8px; border: 1px solid #dce7e0; border-radius: 8px; color: var(--ink); background: white; font-size: 13px; }
+    .market-currency-select { flex: 0 0 74px; padding: 8px 5px; border: 1px solid #dce7e0; border-radius: 8px; color: var(--ink); background: white; font-size: 11px; }
+    .market-price-input:focus, .market-currency-select:focus { outline: 3px solid rgba(7,136,109,.18); border-color: #8abca7; }
+    .market-converted { margin: 8px 0 2px; color: var(--green-dark); font-size: 15px; font-weight: 850; }
+    .market-status { min-height: 14px; margin: 3px 0 0; color: #87958f; font-size: 9px; line-height: 1.4; }
+    .market-cheapest-tag { display: inline-block; margin: 0 0 8px; padding: 4px 7px; border-radius: 999px; color: #066c58; background: #dff3e8; font-size: 9px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+    .market-price-main { margin: 5px 0 2px; color: var(--green-dark); font-size: 20px; font-weight: 850; letter-spacing: -.5px; }
+    .market-original { margin: 0 0 9px; color: #75857e; font-size: 10px; }
+    .market-product-title { margin: 9px 0 4px; color: #40544b; font-size: 11px; font-weight: 700; line-height: 1.45; }
+    .market-source { margin: 0 0 9px; color: #83918b; font-size: 10px; }
+    .market-delivery { margin: 0 0 9px; color: #6f8078; font-size: 10px; line-height: 1.4; }
+    .market-error { margin: 12px 0 0; color: #8b574d; font-size: 11px; line-height: 1.45; }
+    .market-card-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; color: var(--ink); font-size: 13px; font-weight: 800; }
+    .market-flag { font-size: 18px; }
+    .market-card-meta { margin: 0 0 11px; color: #819089; font-size: 10px; }
+    .market-link { display: inline-flex; align-items: center; gap: 5px; color: var(--green-dark); font-size: 11px; font-weight: 800; text-decoration: none; }
+    .market-link:hover { text-decoration: underline; }
+    .market-link:focus-visible { outline: 3px solid rgba(7,136,109,.28); outline-offset: 3px; border-radius: 3px; }
+    .free-note {
+      margin: 12px 0 0;
+      color: #7b8c85;
+      font-size: 12px;
+    }
+
+    main {
+      width: min(1160px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 36px 0 74px;
+    }
+    .catalog-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .section-kicker {
+      margin: 0 0 6px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin: 0;
+      font-size: 25px;
+      letter-spacing: -.8px;
+    }
+    .count {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #63756e;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .sort-wrap select {
+      padding: 10px 34px 10px 12px;
+      border: 1px solid #dfe8e3;
+      border-radius: 10px;
+      color: var(--ink);
+      background: white;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .filters {
+      display: flex;
+      gap: 9px;
+      margin: 0 0 23px;
+      overflow-x: auto;
+      padding: 2px 1px 6px;
+      scrollbar-width: thin;
+    }
+    .filter {
+      flex: 0 0 auto;
+      padding: 10px 15px;
+      border: 1px solid #e1e9e4;
+      border-radius: 999px;
+      color: #60716a;
+      background: white;
+      font-size: 13px;
+      font-weight: 680;
+      cursor: pointer;
+      transition: all .16s ease;
+    }
+    .filter:hover { border-color: #a9d3c1; color: var(--green-dark); }
+    .filter[aria-pressed="true"] {
+      border-color: var(--ink);
+      color: white;
+      background: var(--ink);
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 19px;
+    }
+    .card {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid #e8eeea;
+      border-radius: 17px;
+      background: var(--paper);
+      box-shadow: 0 8px 24px rgba(27, 57, 48, .045);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .product-image {
+      position: relative;
+      height: 205px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #e6f1ec, #f4f2e9);
+    }
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      transition: transform .4s ease;
+    }
+    .card:hover .product-image img { transform: scale(1.035); }
+    .product-image.image-fallback::after {
+      content: "Image de démonstration";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #73867e;
+      font-size: 13px;
+      font-weight: 650;
+    }
+    .category-tag {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 6px 9px;
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 999px;
+      color: #25483c;
+      background: rgba(255,255,255,.9);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+    .card-body { padding: 16px 16px 14px; }
+    .product-title {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.25;
+      letter-spacing: -.35px;
+    }
+    .product-description {
+      min-height: 37px;
+      margin: 7px 0 15px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .offers {
+      padding-top: 11px;
+      border-top: 1px solid #edf1ee;
+    }
+    .offers-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      color: #82928b;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .offer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 9px;
+      padding: 9px 0;
+      border-bottom: 1px solid #f0f3f1;
+    }
+    .offer-row:last-child { padding-bottom: 2px; border-bottom: 0; }
+    .seller {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 9px;
+    }
+    .seller-mark {
+      width: 29px;
+      height: 29px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      color: var(--green-dark);
+      background: var(--mint);
+      font-size: 11px;
+      font-weight: 850;
+    }
+    .seller-details { min-width: 0; }
+    .seller-name {
+      display: block;
+      overflow: hidden;
+      color: #41534c;
+      font-size: 11px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .seller-label {
+      display: block;
+      margin-top: 2px;
+      color: #94a19b;
+      font-size: 9px;
+    }
+    .offer-price {
+      flex: 0 0 auto;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -.3px;
+    }
+    .demo-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      margin-top: 23px;
+      padding: 14px 16px;
+      border: 1px solid #dcece3;
+      border-radius: 12px;
+      color: #52685f;
+      background: #edf7f1;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .demo-banner svg { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 1px; color: var(--green); }
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 48px 20px;
+      border: 1px dashed #d3e0d8;
+      border-radius: 16px;
+      color: var(--muted);
+      background: rgba(255,255,255,.65);
+      text-align: center;
+    }
+    .empty-state strong { display: block; margin-bottom: 6px; color: var(--ink); font-size: 17px; }
+    footer {
+      padding: 23px 24px 27px;
+      border-top: 1px solid #e6ece8;
+      color: #819089;
+      background: #f1f5f2;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 850px) {
+      .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .product-image { height: 190px; }
+    }
+    @media (max-width: 600px) {
+      .topbar { width: calc(100% - 32px); height: 70px; }
+      .top-note { font-size: 11px; }
+      .hero { padding: 42px 18px 38px; }
+      h1 { letter-spacing: -1.8px; }
+      .hero-copy { font-size: 14px; }
+      .search { margin-top: 22px; }
+      .search button { padding: 0 13px; font-size: 13px; }
+      .search input { padding-left: 8px; font-size: 14px; }
+      main { width: calc(100% - 32px); padding-top: 29px; }
+      .catalog-head { align-items: flex-start; flex-direction: column; gap: 14px; }
+      .sort-wrap { width: 100%; justify-content: space-between; }
+      .sort-wrap select { flex: 1; max-width: 230px; }
+      .product-grid { gap: 12px; }
+      .product-image { height: 145px; }
+      .market-results { padding: 17px; }
+      .market-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .card-body { padding: 13px 12px 12px; }
+      .product-title { font-size: 15px; }
+      .product-description { min-height: 54px; margin-bottom: 11px; font-size: 11px; }
+      .seller-mark { width: 26px; height: 26px; }
+      .offer-price { font-size: 12px; }
+      .seller-name { font-size: 10px; }
+      .seller-label { font-size: 8px; }
+    }
+    @media (max-width: 390px) {
+      .top-note { display: none; }
+      .product-grid { grid-template-columns: 1fr; }
+      .market-grid { grid-template-columns: 1fr; }
+      .product-image { height: 205px; }
+      .product-description { min-height: 0; }
+      .card-body { padding: 15px; }
+      .offer-price { font-size: 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="PrixRadar, accueil">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8.2" stroke="currentColor" stroke-width="1.7"/>
+          <circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.5" opacity=".75"/>
+          <path d="M12 12 18.1 6.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="1.4" fill="currentColor"/>
+        </svg>
+      </span>
+      <span>Prix<span>Radar</span></span>
+    </a>
+    <div class="top-note"><span class="status-dot" aria-hidden="true"></span>Comparateur gratuit · démo</div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" fill="currentColor"/></svg>
+        Une démo gratuite
+      </div>
+      <h1>Les bons prix se<br><span>repèrent ici.</span></h1>
+      <p class="hero-copy">Recherche un produit et compare automatiquement les offres Google Shopping dans plusieurs pays.</p>
+      <form class="search" id="searchForm" role="search">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input id="searchInput" type="search" required placeholder="Ex. smartphone, baskets, lampe…" aria-label="Rechercher un produit">
+        <button type="submit">Comparer les pays</button>
+      </form>
+      <p class="free-note">Recherche automatique · quota gratuit limité · clé privée requise</p>
+      <div class="market-picker">
+        <p class="market-picker-title">Comparer Google Shopping par pays</p>
+        <div class="market-chips" id="marketButtons" role="group" aria-label="Pays à comparer"></div>
+        <p class="market-tip">Choisis les pays à comparer, puis lance ta recherche.</p>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section class="market-results" id="marketResults" hidden aria-live="polite" aria-labelledby="marketResultTitle">
+      <p class="section-kicker">Recherche par pays</p>
+      <h2 id="marketResultTitle"></h2>
+      <p class="cheapest-summary" id="cheapestSummary" role="status" aria-live="polite">Les prix saisis apparaîtront ici, classés en euros.</p>
+      <p class="market-result-note" id="marketResultNote">Les offres viennent de Google Shopping et sont converties en euros avec un taux de référence. Vérifie le modèle exact, la livraison, les taxes et la douane avant de comparer le coût total.</p>
+      <div class="market-grid" id="marketGrid"></div>
+    </section>
+    <div class="catalog-head">
+      <div>
+        <p class="section-kicker">La sélection PrixRadar</p>
+        <h2>Exemples de produits</h2>
+        <p class="count" id="resultCount" aria-live="polite"></p>
+      </div>
+      <label class="sort-wrap" for="sortSelect">
+        Trier par
+        <select id="sortSelect" aria-label="Trier les produits par prix">
+          <option value="ascending">Prix : du moins cher au plus cher</option>
+          <option value="descending">Prix : du plus cher au moins cher</option>
+        </select>
+      </label>
+    </div>
+
+    <nav class="filters" aria-label="Filtrer par catégorie">
+      <button class="filter" type="button" data-filter="all" aria-pressed="true">Tout voir</button>
+      <button class="filter" type="button" data-filter="phones" aria-pressed="false">Téléphones</button>
+      <button class="filter" type="button" data-filter="computing" aria-pressed="false">Informatique</button>
+      <button class="filter" type="button" data-filter="clothing" aria-pressed="false">Vêtements</button>
+      <button class="filter" type="button" data-filter="home" aria-pressed="false">Maison</button>
+    </nav>
+
+    <section class="product-grid" id="productGrid" aria-label="Produits et offres fictifs"></section>
+
+    <aside class="demo-banner">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.8v5.4M12 7.8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span><strong>À savoir :</strong> tous les produits, prix et noms de vendeurs sur cette page sont fictifs et servent uniquement à illustrer le fonctionnement de PrixRadar. Les images sont des visuels d’exemple hébergés par Unsplash.</span>
+    </aside>
+  </main>
+
+  <footer>PrixRadar · Projet de démonstration gratuit · Aucune offre commerciale réelle</footer>
+
+  <script>
+    const products = [
+      {
+        title: "Lampe Halo",
+        category: "home",
+        categoryLabel: "Maison",
+        description: "Une lumière douce pour créer une ambiance chaleureuse.",
+        image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Lampe de table dans un intérieur lumineux",
+        offers: [{ seller: "Vendeur fictif A", price: 39 }, { seller: "Vendeur fictif B", price: 46 }]
+      },
+      {
+        title: "Baskets Tempo",
+        category: "clothing",
+        categoryLabel: "Vêtements",
+        description: "Des baskets légères pour accompagner les journées actives.",
+        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Basket rouge photographiée sur fond clair",
+        offers: [{ seller: "Vendeur fictif A", price: 74 }, { seller: "Vendeur fictif B", price: 82 }]
+      },
+      {
+        title: "Casque Studio",
+        category: "computing",
+        categoryLabel: "Informatique",
+        description: "Un casque sans fil pour écouter musique et podcasts.",
+        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Casque audio posé sur une surface claire",
+        offers: [{ seller: "Vendeur fictif A", price: 89 }, { seller: "Vendeur fictif B", price: 105 }]
+      },
+      {
+        title: "Veste Alba",
+        category: "clothing",
+        categoryLabel: "Vêtements",
+        description: "Une veste décontractée à porter en toute saison.",
+        image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Veste sur cintre dans un studio",
+        offers: [{ seller: "Vendeur fictif A", price: 96 }, { seller: "Vendeur fictif B", price: 119 }]
+      },
+      {
+        title: "Fauteuil Noma",
+        category: "home",
+        categoryLabel: "Maison",
+        description: "Un fauteuil compact pour aménager un coin lecture.",
+        image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Coin salon lumineux avec mobilier contemporain",
+        offers: [{ seller: "Vendeur fictif A", price: 189 }, { seller: "Vendeur fictif B", price: 219 }]
+      },
+      {
+        title: "Smartphone Nova",
+        category: "phones",
+        categoryLabel: "Téléphones",
+        description: "Un téléphone de démonstration avec grand écran.",
+        image: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Smartphone présenté sur un fond coloré",
+        offers: [{ seller: "Vendeur fictif A", price: 279 }, { seller: "Vendeur fictif B", price: 319 }]
+      },
+      {
+        title: "Téléphone Pulse 5G",
+        category: "phones",
+        categoryLabel: "Téléphones",
+        description: "Un modèle fictif pour comparer plusieurs offres.",
+        image: "https://images.unsplash.com/photo-1511709268805-0e5e3a345e73?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Téléphone mobile vu de face",
+        offers: [{ seller: "Vendeur fictif A", price: 349 }, { seller: "Vendeur fictif B", price: 389 }]
+      },
+      {
+        title: "Ordinateur Horizon",
+        category: "computing",
+        categoryLabel: "Informatique",
+        description: "Un ordinateur portable fictif pour le travail et les études.",
+        image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1000&q=82",
+        imageAlt: "Ordinateur portable ouvert sur un bureau",
+        offers: [{ seller: "Vendeur fictif A", price: 649 }, { seller: "Vendeur fictif B", price: 729 }]
+      },
+    {
+      title: "Téléphone Mini",
+      category: "phones",
+      categoryLabel: "Téléphones",
+      description: "Un format compact imaginé pour cette démo.",
+      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Téléphone compact photographié sur fond clair",
+      offers: [{ seller: "Vendeur fictif A", price: 159 }, { seller: "Vendeur fictif B", price: 179 }]
+    },
+    {
+      title: "Smartphone Aster",
+      category: "phones",
+      categoryLabel: "Téléphones",
+      description: "Un modèle de démonstration avec écran lumineux.",
+      image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Smartphone de démonstration vu de près",
+      offers: [{ seller: "Vendeur fictif A", price: 229 }, { seller: "Vendeur fictif B", price: 249 }]
+    },
+    {
+      title: "Téléphone Lumen",
+      category: "phones",
+      categoryLabel: "Téléphones",
+      description: "Un téléphone fictif pour comparer les niveaux de prix.",
+      image: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Téléphone mobile sur fond coloré",
+      offers: [{ seller: "Vendeur fictif A", price: 459 }, { seller: "Vendeur fictif B", price: 489 }]
+    },
+    {
+      title: "Smartphone Solar",
+      category: "phones",
+      categoryLabel: "Téléphones",
+      description: "Un grand écran de démonstration avec appareil photo fictif.",
+      image: "https://images.unsplash.com/photo-1511709268805-0e5e3a345e73?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Smartphone présenté sur une surface claire",
+      offers: [{ seller: "Vendeur fictif A", price: 529 }, { seller: "Vendeur fictif B", price: 579 }]
+    },
+    {
+      title: "Souris Flux",
+      category: "computing",
+      categoryLabel: "Informatique",
+      description: "Une souris sans fil fictive pour le bureau.",
+      image: "https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Souris d’ordinateur sur un bureau",
+      offers: [{ seller: "Vendeur fictif A", price: 24 }, { seller: "Vendeur fictif B", price: 31 }]
+    },
+    {
+      title: "Clavier Nova",
+      category: "computing",
+      categoryLabel: "Informatique",
+      description: "Un clavier compact de démonstration.",
+      image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Clavier d’ordinateur photographié de dessus",
+      offers: [{ seller: "Vendeur fictif A", price: 59 }, { seller: "Vendeur fictif B", price: 72 }]
+    },
+    {
+      title: "Webcam Clair",
+      category: "computing",
+      categoryLabel: "Informatique",
+      description: "Une webcam fictive pour les appels vidéo.",
+      image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Appareil photo numérique utilisé comme visuel de démonstration",
+      offers: [{ seller: "Vendeur fictif A", price: 79 }, { seller: "Vendeur fictif B", price: 94 }]
+    },
+    {
+      title: "Écran Boréal 27",
+      category: "computing",
+      categoryLabel: "Informatique",
+      description: "Un écran de bureau fictif au format panoramique.",
+      image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Écran d’ordinateur sur un bureau",
+      offers: [{ seller: "Vendeur fictif A", price: 229 }, { seller: "Vendeur fictif B", price: 269 }]
+    },
+    {
+      title: "Chaussettes Coton",
+      category: "clothing",
+      categoryLabel: "Vêtements",
+      description: "Un lot de chaussettes tout doux pour la démo.",
+      image: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Vêtement en coton plié",
+      offers: [{ seller: "Vendeur fictif A", price: 12 }, { seller: "Vendeur fictif B", price: 16 }]
+    },
+    {
+      title: "T-shirt Atlas",
+      category: "clothing",
+      categoryLabel: "Vêtements",
+      description: "Un t-shirt basique présenté comme exemple fictif.",
+      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "T-shirt posé à plat",
+      offers: [{ seller: "Vendeur fictif A", price: 18 }, { seller: "Vendeur fictif B", price: 24 }]
+    },
+    {
+      title: "Sac Urbain",
+      category: "clothing",
+      categoryLabel: "Vêtements",
+      description: "Un sac à dos pratique pour les trajets quotidiens.",
+      image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Sac à dos de ville",
+      offers: [{ seller: "Vendeur fictif A", price: 42 }, { seller: "Vendeur fictif B", price: 55 }]
+    },
+    {
+      title: "Pull Coton",
+      category: "clothing",
+      categoryLabel: "Vêtements",
+      description: "Un pull doux de démonstration pour les journées fraîches.",
+      image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Vêtement en maille photographié de près",
+      offers: [{ seller: "Vendeur fictif A", price: 58 }, { seller: "Vendeur fictif B", price: 69 }]
+    },
+    {
+      title: "Mug Studio",
+      category: "home",
+      categoryLabel: "Maison",
+      description: "Un mug en céramique pour compléter la sélection maison.",
+      image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Tasses en céramique posées sur une table",
+      offers: [{ seller: "Vendeur fictif A", price: 12 }, { seller: "Vendeur fictif B", price: 17 }]
+    },
+    {
+      title: "Plante Calathea",
+      category: "home",
+      categoryLabel: "Maison",
+      description: "Une plante d’intérieur pour apporter une touche de vert.",
+      image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Plante verte d’intérieur dans un pot",
+      offers: [{ seller: "Vendeur fictif A", price: 28 }, { seller: "Vendeur fictif B", price: 36 }]
+    },
+    {
+      title: "Coussin Mousse",
+      category: "home",
+      categoryLabel: "Maison",
+      description: "Un coussin décoratif doux dans des tons naturels.",
+      image: "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Coussin décoratif dans un salon",
+      offers: [{ seller: "Vendeur fictif A", price: 24 }, { seller: "Vendeur fictif B", price: 32 }]
+    },
+    {
+      title: "Étagère Lino",
+      category: "home",
+      categoryLabel: "Maison",
+      description: "Une petite étagère de démonstration pour le rangement.",
+      image: "https://images.unsplash.com/photo-1594620302200-9a762244a156?auto=format&fit=crop&w=1000&q=82",
+      imageAlt: "Étagère et mobilier dans un intérieur",
+      offers: [{ seller: "Vendeur fictif A", price: 119 }, { seller: "Vendeur fictif B", price: 139 }]
+    },
+    ];
+
+    const markets = [
+      { code: "FR", name: "France", flag: "🇫🇷", language: "fr", currency: "EUR" },
+      { code: "BE", name: "Belgique", flag: "🇧🇪", language: "fr", currency: "EUR" },
+      { code: "DE", name: "Allemagne", flag: "🇩🇪", language: "de", currency: "EUR" },
+      { code: "ES", name: "Espagne", flag: "🇪🇸", language: "es", currency: "EUR" },
+      { code: "IT", name: "Italie", flag: "🇮🇹", language: "it", currency: "EUR" },
+      { code: "GB", name: "Royaume-Uni", flag: "🇬🇧", language: "en", currency: "GBP" },
+      { code: "US", name: "États-Unis", flag: "🇺🇸", language: "en", currency: "USD" },
+      { code: "CA", name: "Canada", flag: "🇨🇦", language: "en", currency: "CAD" }
+    ];
+    const productGrid = document.getElementById("productGrid");
+    const resultCount = document.getElementById("resultCount");
+    const searchInput = document.getElementById("searchInput");
+    const sortSelect = document.getElementById("sortSelect");
+    const filterButtons = Array.from(document.querySelectorAll("[data-filter]"));
+    const marketButtonsElement = document.getElementById("marketButtons");
+    const marketResults = document.getElementById("marketResults");
+    const marketResultTitle = document.getElementById("marketResultTitle");
+    const marketResultNote = document.getElementById("marketResultNote");
+    const cheapestSummary = document.getElementById("cheapestSummary");
+    const marketGrid = document.getElementById("marketGrid");
+    const selectedMarkets = new Set(markets.map(market => market.code));
+    let marketQuery = "";
+    let activeCategory = "all";
+    let searchTerm = "";
+
+    function normalize(value) {
+      return value.toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function formatPrice(price) {
+      return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        maximumFractionDigits: 0
+      }).format(price);
+    }
+
+    function bestPrice(product) {
+      return Math.min(...product.offers.map(offer => offer.price));
+    }
+
+    function renderMarketButtons() {
+      marketButtonsElement.replaceChildren();
+      markets.forEach(market => {
+        const button = document.createElement("button");
+        button.className = "market-chip";
+        button.type = "button";
+        button.textContent = market.flag + " " + market.name;
+        button.setAttribute("aria-pressed", String(selectedMarkets.has(market.code)));
+        button.addEventListener("click", () => {
+          if (selectedMarkets.has(market.code)) {
+            selectedMarkets.delete(market.code);
+          } else {
+            selectedMarkets.add(market.code);
+          }
+          button.setAttribute("aria-pressed", String(selectedMarkets.has(market.code)));
+          if (marketQuery) marketResultNote.textContent = "Pays modifiés. Relance la recherche pour actualiser la comparaison.";
+        });
+        marketButtonsElement.append(button);
+      });
+    }
+
+    let comparisonRequestId = 0;
+
+    function formatEuro(amount) {
+      return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(amount);
+    }
+
+    function appendComparisonEmpty(titleText, messageText) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      const title = document.createElement("strong");
+      title.textContent = titleText;
+      const message = document.createElement("span");
+      message.textContent = messageText;
+      empty.append(title, message);
+      marketGrid.append(empty);
+    }
+
+    function createMarketCard(result, cheapestCode) {
+      const card = document.createElement("article");
+      card.className = result.code === cheapestCode ? "market-card is-cheapest" : "market-card";
+
+      const heading = document.createElement("div");
+      heading.className = "market-card-heading";
+      const flag = document.createElement("span");
+      flag.className = "market-flag";
+      flag.setAttribute("aria-hidden", "true");
+      flag.textContent = result.flag;
+      const name = document.createElement("span");
+      name.textContent = result.name;
+      heading.append(flag, name);
+      card.append(heading);
+
+      const meta = document.createElement("p");
+      meta.className = "market-card-meta";
+      meta.textContent = "Marché " + result.code;
+      card.append(meta);
+
+      if (result.error || !result.best) {
+        const error = document.createElement("p");
+        error.className = "market-error";
+        error.textContent = result.error || "Aucune offre comparable trouvée.";
+        card.append(error);
+        return card;
+      }
+
+      if (result.code === cheapestCode) {
+        const badge = document.createElement("span");
+        badge.className = "market-cheapest-tag";
+        badge.textContent = "Pays le moins cher";
+        card.append(badge);
+      }
+
+      const euroPrice = document.createElement("p");
+      euroPrice.className = "market-price-main";
+      euroPrice.textContent = formatEuro(result.best.priceEur);
+      card.append(euroPrice);
+
+      const original = document.createElement("p");
+      original.className = "market-original";
+      original.textContent = "Prix affiché : " + result.best.price;
+      card.append(original);
+
+      const product = document.createElement("p");
+      product.className = "market-product-title";
+      product.textContent = result.best.title;
+      card.append(product);
+
+      const seller = document.createElement("p");
+      seller.className = "market-source";
+      seller.textContent = "Vendeur : " + (result.best.source || "vendeur Google Shopping");
+      card.append(seller);
+
+      if (result.best.delivery) {
+        const delivery = document.createElement("p");
+        delivery.className = "market-delivery";
+        delivery.textContent = result.best.delivery;
+        card.append(delivery);
+      }
+
+      if (result.best.link) {
+        try {
+          const offerUrl = new URL(result.best.link);
+          if (offerUrl.protocol === "https:") {
+            const link = document.createElement("a");
+            link.href = offerUrl.toString();
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.className = "market-link";
+            link.textContent = "Voir l’offre ↗";
+            link.setAttribute("aria-label", "Voir cette offre chez " + (result.best.source || result.name));
+            card.append(link);
+          }
+        } catch (error) {
+          // An invalid result URL is omitted.
+        }
+      }
+
+      return card;
+    }
+
+    async function renderMarketResults(query) {
+      const requestId = ++comparisonRequestId;
+      marketQuery = query;
+      marketResults.hidden = false;
+      marketResultTitle.textContent = "Comparaison en cours pour « " + query + " »";
+      cheapestSummary.textContent = "Recherche des offres dans les pays sélectionnés…";
+      marketGrid.replaceChildren();
+
+      if (!selectedMarkets.size) {
+        cheapestSummary.textContent = "Choisis au moins un pays.";
+        appendComparisonEmpty("Choisis au moins un pays", "Active un pays au-dessus puis relance la recherche.");
+        return;
+      }
+
+      appendComparisonEmpty("Recherche en cours", "PrixRadar compare les résultats par pays.");
+      const params = new URLSearchParams();
+      params.set("q", query);
+      selectedMarkets.forEach(code => params.append("market", code));
+
+      try {
+        const response = await fetch("/api/compare?" + params.toString(), {
+          headers: { Accept: "application/json" }
+        });
+        const data = await response.json();
+        if (requestId !== comparisonRequestId) return;
+        if (!response.ok) throw new Error(data.error || "Le service de comparaison est indisponible.");
+
+        marketGrid.replaceChildren();
+        marketResultTitle.textContent = "Résultats pour « " + query + " »";
+        if (data.rateDate) {
+          marketResultNote.textContent = "Prix convertis en euros avec le taux de référence du " + data.rateDate + ". Hors livraison, taxes et douane; vérifie le modèle exact.";
+        }
+
+        if (data.cheapest) {
+          cheapestSummary.textContent = "Pays le moins cher : " + data.cheapest.name + " — " + formatEuro(data.cheapest.priceEur);
+        } else {
+          cheapestSummary.textContent = "Aucune offre comparable trouvée. Essaie une recherche plus précise.";
+        }
+
+        if (!data.markets || !data.markets.length) {
+          appendComparisonEmpty("Aucun résultat", "Essaie avec la marque et le modèle complet.");
+          return;
+        }
+        data.markets.forEach(result => marketGrid.append(createMarketCard(result, data.cheapest && data.cheapest.code)));
+      } catch (error) {
+        if (requestId !== comparisonRequestId) return;
+        marketGrid.replaceChildren();
+        marketResultTitle.textContent = "Comparaison indisponible";
+        cheapestSummary.textContent = "La comparaison automatique n’a pas pu démarrer.";
+        const message = error instanceof TypeError
+          ? "Lance start-prixradar.bat puis ouvre PrixRadar depuis localhost."
+          : error.message;
+        appendComparisonEmpty("Vérifie la configuration", message);
+      }
+    }
+    function createOfferRow(offer, index) {
+      const row = document.createElement("div");
+      row.className = "offer-row";
+
+      const seller = document.createElement("div");
+      seller.className = "seller";
+
+      const mark = document.createElement("span");
+      mark.className = "seller-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = index === 0 ? "A" : "B";
+
+      const details = document.createElement("span");
+      details.className = "seller-details";
+
+      const name = document.createElement("span");
+      name.className = "seller-name";
+      name.textContent = offer.seller;
+
+      const label = document.createElement("span");
+      label.className = "seller-label";
+      label.textContent = "Vendeur fictif";
+
+      details.append(name, label);
+      seller.append(mark, details);
+
+      const price = document.createElement("span");
+      price.className = "offer-price";
+      price.textContent = formatPrice(offer.price);
+
+      row.append(seller, price);
+      return row;
+    }
+
+    function createProductCard(product) {
+      const card = document.createElement("article");
+      card.className = "card";
+
+      const imageWrap = document.createElement("div");
+      imageWrap.className = "product-image";
+
+      const image = document.createElement("img");
+      image.src = product.image;
+      image.alt = product.imageAlt;
+      image.loading = "lazy";
+      image.onerror = () => {
+        imageWrap.classList.add("image-fallback");
+        image.remove();
+      };
+
+      const category = document.createElement("span");
+      category.className = "category-tag";
+      category.textContent = product.categoryLabel;
+      imageWrap.append(image, category);
+
+      const body = document.createElement("div");
+      body.className = "card-body";
+
+      const title = document.createElement("h3");
+      title.className = "product-title";
+      title.textContent = product.title;
+
+      const description = document.createElement("p");
+      description.className = "product-description";
+      description.textContent = product.description;
+
+      const offers = document.createElement("div");
+      offers.className = "offers";
+
+      const offersHead = document.createElement("div");
+      offersHead.className = "offers-head";
+
+      const offersLabel = document.createElement("span");
+      offersLabel.textContent = "Offres fictives";
+
+      const offersCount = document.createElement("span");
+      offersCount.textContent = product.offers.length + " vendeurs démo";
+
+      offersHead.append(offersLabel, offersCount);
+      offers.append(offersHead);
+
+      const sortedOffers = product.offers.slice().sort((a, b) => a.price - b.price);
+      sortedOffers.forEach((offer, index) => offers.append(createOfferRow(offer, index)));
+
+      body.append(title, description, offers);
+      card.append(imageWrap, body);
+      return card;
+    }
+
+    function render() {
+      const query = normalize(searchTerm.trim());
+      const visibleProducts = products.filter(product => {
+        const matchesCategory = activeCategory === "all" || product.category === activeCategory;
+        const searchableText = normalize([
+          product.title,
+          product.description,
+          product.categoryLabel,
+          ...product.offers.map(offer => offer.seller)
+        ].join(" "));
+        return matchesCategory && (!query || searchableText.includes(query));
+      });
+
+      const direction = sortSelect.value === "descending" ? -1 : 1;
+      visibleProducts.sort((a, b) => direction * (bestPrice(a) - bestPrice(b)));
+
+      resultCount.textContent = visibleProducts.length + (visibleProducts.length > 1 ? " produits fictifs" : " produit fictif");
+      productGrid.replaceChildren();
+
+      if (!visibleProducts.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        const title = document.createElement("strong");
+        title.textContent = "Aucun exemple local correspondant";
+        const message = document.createElement("span");
+        message.textContent = "Les résultats Google Shopping par pays restent disponibles au-dessus.";
+        empty.append(title, message);
+        productGrid.append(empty);
+        return;
+      }
+
+      visibleProducts.forEach(product => productGrid.append(createProductCard(product)));
+    }
+
+    document.getElementById("searchForm").addEventListener("submit", event => {
+      event.preventDefault();
+      searchTerm = searchInput.value.trim();
+      if (!searchTerm) return;
+      render();
+      renderMarketResults(searchTerm);
+    });
+
+
+    sortSelect.addEventListener("change", render);
+
+    filterButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        activeCategory = button.dataset.filter;
+        filterButtons.forEach(filter => {
+          filter.setAttribute("aria-pressed", String(filter === button));
+        });
+        render();
+      });
+    });
+
+    renderMarketButtons();
+    render();
+  </script>
+</body>
+</html>
