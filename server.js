@@ -115,6 +115,62 @@ async function searchMarket(query, market, apiKey) {
   return Array.isArray(data.shopping_results) ? data.shopping_results : [];
 }
 
+const PRODUCT_SEARCH_CACHE = new Map();
+const PRODUCT_SEARCH_TTL_MS = 10 * 60 * 1000;
+
+function safeHttpsUrl(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:" ? url.toString() : "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function extractGoogleProductCards(results, query) {
+  if (!Array.isArray(results)) return [];
+  return results.slice(0, 40).map(item => {
+    const title = String(item.title || "").trim();
+    const score = relevance(title, query);
+    return {
+      title,
+      price: String(item.price || ""),
+      source: String(item.source || ""),
+      image: safeHttpsUrl(item.thumbnail || item.serpapi_thumbnail),
+      link: safeHttpsUrl(item.product_link || item.link),
+      rating: item.rating == null || !Number.isFinite(Number(item.rating)) ? null : Number(item.rating),
+      reviews: item.reviews == null || !Number.isFinite(Number(item.reviews)) ? null : Number(item.reviews),
+      delivery: String(item.delivery || ""),
+      score
+    };
+  }).filter(item =>
+    item.title &&
+    item.score >= 0.5 &&
+    !isLikelyAccessory(item.title, query)
+  ).slice(0, 24);
+}
+
+async function searchGoogleProducts(query, apiKey) {
+  if (!apiKey || apiKey === "COLLE_TA_CLE_ICI") {
+    throw new Error("Ajoute ta clé SerpApi dans le fichier .env ou dans Render.");
+  }
+  const cacheKey = normalize(query);
+  const now = Date.now();
+  const cached = PRODUCT_SEARCH_CACHE.get(cacheKey);
+  if (cached && cached.expiresAt > now) return cached.payload;
+
+  const rawResults = await searchMarket(query, MARKETS.FR, apiKey);
+  const payload = {
+    query,
+    market: MARKETS.FR.name,
+    products: extractGoogleProductCards(rawResults, query)
+  };
+  PRODUCT_SEARCH_CACHE.set(cacheKey, { expiresAt: now + PRODUCT_SEARCH_TTL_MS, payload });
+  if (PRODUCT_SEARCH_CACHE.size > 100) {
+    PRODUCT_SEARCH_CACHE.delete(PRODUCT_SEARCH_CACHE.keys().next().value);
+  }
+  return payload;
+}
 async function exchangeRateToEur(currency) {
   if (currency === "EUR") return { rate: 1, date: null };
   const url = "https://api.frankfurter.dev/v2/rate/" + encodeURIComponent(currency) + "/EUR";
@@ -225,6 +281,31 @@ function createServer() {
   return http.createServer(async (request, response) => {
     const requestUrl = new URL(request.url, "http://127.0.0.1:" + PORT);
 
+    if (requestUrl.pathname === "/api/products") {
+      if (request.method !== "GET") {
+        sendJson(response, 405, { error: "Méthode non autorisée." });
+        return;
+      }
+      const query = String(requestUrl.searchParams.get("q") || "").trim();
+      if (!query || query.length > 140) {
+        sendJson(response, 400, { error: "Saisis un produit (140 caractères maximum)." });
+        return;
+      }
+      const apiKey = process.env.SERPAPI_KEY;
+      if (!apiKey || apiKey === "COLLE_TA_CLE_ICI") {
+        sendJson(response, 503, { error: "La clé SerpApi manque dans les variables Render." });
+        return;
+      }
+      try {
+        sendJson(response, 200, await searchGoogleProducts(query, apiKey));
+      } catch (error) {
+        const safeError = /clé API|quota/i.test(error.message)
+          ? error.message
+          : "La recherche Google Shopping est momentanément indisponible.";
+        sendJson(response, 502, { error: safeError });
+      }
+      return;
+    }
     if (requestUrl.pathname === "/api/compare") {
       if (request.method !== "GET") {
         sendJson(response, 405, { error: "Méthode non autorisée." });
@@ -281,9 +362,9 @@ if (require.main === module) {
   server.listen(PORT, process.env.HOST || "127.0.0.1", () => {
     console.log("PrixRadar est disponible sur http://127.0.0.1:" + PORT);
     if (!process.env.SERPAPI_KEY || process.env.SERPAPI_KEY === "COLLE_TA_CLE_ICI") {
-      console.log("Ajoute une clé SerpApi dans .env pour activer la comparaison réelle.");
+      console.log("Ajoute une clé SerpApi dans .env pour activer la recherche Google Shopping.");
     }
   });
 }
 
-module.exports = { MARKETS, compareMarkets, createServer, extractCandidates };
+module.exports = { MARKETS, compareMarkets, createServer, extractCandidates, extractGoogleProductCards, searchGoogleProducts };
