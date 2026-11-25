@@ -10,6 +10,6 @@ DÉMARRER SUR TON PC
 4. Ouvre l’adresse locale indiquée par le programme.
 
 SUR RENDER
-Ajoute SERPAPI_KEY dans les variables d’environnement du service. Ne mets pas la clé dans index.html ni dans .env.example.
+Dans Render, ouvre PrixRadar > Environment. Ajoute ou remplace SERPAPI_KEY avec la valeur de ta clé uniquement, sans guillemets ni le texte SERPAPI_KEY=, puis enregistre. Si elle est refusée, copie une clé active depuis SerpApi. Ne mets pas la clé dans index.html ni dans .env.example.
 
 La recherche affiche des offres fournies par Google Shopping. Les prix et la disponibilité peuvent changer : vérifie les détails sur le site du vendeur. Le fil de découverte reste composé d’exemples fictifs. PrixRadar ne compare pas les prix entre pays.

@@ -70,7 +70,7 @@ async function searchMarket(query, market, apiKey) {
   } catch (error) {
     data = {};
   }
-  if (response.status === 401 || response.status === 403) throw new Error("La clé API n’est pas reconnue. Vérifie le fichier .env.");
+  if (response.status === 401 || response.status === 403) throw new Error("La clé SerpApi enregistrée sur Render est refusée. Dans le service PrixRadar, ouvre Environment et remplace SERPAPI_KEY par la valeur de ta clé uniquement, sans guillemets ni le texte SERPAPI_KEY=, puis enregistre.");
   if (response.status === 429) throw new Error("Le quota gratuit est atteint ou la limite temporaire est dépassée.");
   if (!response.ok || data.error) throw new Error("Google Shopping est indisponible pour cette recherche.");
   return Array.isArray(data.shopping_results) ? data.shopping_results : [];
