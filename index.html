@@ -1777,4 +1777,289 @@
         const rating = document.createElement("p");
         rating.className = "google-product-meta";
         rating.textContent = Number(product.rating).toFixed(1) + " ★";
-        if (product.reviews != null && Number.isFinite(Number(product.reviews)) && Number(product.reviews) >
+        if (product.reviews != null && Number.isFinite(Number(product.reviews)) && Number(product.reviews) > 0) {
+          rating.textContent += " · " +
+            new Intl.NumberFormat("fr-FR").format(Number(product.reviews)) + " avis";
+        }
+        body.append(rating);
+      }
+
+      if (product.delivery) {
+        const delivery = document.createElement("p");
+        delivery.className = "google-product-meta";
+        delivery.textContent = product.delivery;
+        body.append(delivery);
+      }
+
+      if (product.link) {
+        try {
+          const url = new URL(product.link);
+          if (url.protocol === "https:") {
+            const link = document.createElement("a");
+            link.className = "google-product-link";
+            link.href = url.toString();
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = "Voir la fiche produit ↗";
+            body.append(link);
+          }
+        } catch (error) {
+          // Invalid product links are omitted.
+        }
+      }
+
+      card.append(imageWrap, body);
+      return card;
+    }
+    function updateCount() {
+      const query = searchTerm.trim();
+      if (query) {
+        resultCount.textContent = formatCount(MAX_FEED_ITEMS) +
+          " variantes fictives possibles pour « " + query + " » · " +
+          activeSeeds.length + " modèles utilisés pour inspirer le fil";
+        return;
+      }
+      resultCount.textContent = formatCount(MAX_FEED_ITEMS) +
+        " variantes fictives possibles · " + activeSeeds.length +
+        " modèles visuels dans cette sélection";
+    }
+    function showEmptyState() {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      const title = document.createElement("strong");
+      title.textContent = "Aucune idée trouvée";
+      const message = document.createElement("span");
+      message.textContent = "Essaie un autre mot ou choisis une autre catégorie.";
+      empty.append(title, message);
+      productGrid.append(empty);
+      feedStatus.textContent = "Modifie ta recherche ou change de catégorie pour reprendre le fil.";
+      loadMoreButton.hidden = true;
+    }
+
+    function loadMore() {
+      if (liveSearchActive || !activeSeeds.length || loadedCount >= MAX_FEED_ITEMS) return;
+      const amount = Math.min(BATCH_SIZE, MAX_FEED_ITEMS - loadedCount);
+      const fragment = document.createDocumentFragment();
+      for (let offset = 0; offset < amount; offset += 1) {
+        fragment.append(createProductCard(createVirtualProduct(loadedCount + offset)));
+      }
+      productGrid.append(fragment);
+      loadedCount += amount;
+      feedStatus.textContent = formatCount(loadedCount) + " / " +
+        formatCount(MAX_FEED_ITEMS) + " variantes fictives générées";
+      loadMoreButton.hidden = loadedCount >= MAX_FEED_ITEMS;
+      if (loadedCount >= MAX_FEED_ITEMS) {
+        feedStatus.textContent = "Toutes les variantes fictives prévues pour ce fil ont été générées.";
+      }
+    }
+
+    function resetFeed() {
+      liveSearchActive = false;
+      activeSeeds = getMatchingSeeds();
+      loadedCount = 0;
+      productGrid.setAttribute("aria-busy", "false");
+      productGrid.replaceChildren();
+      catalogTitle.textContent = "À toi de découvrir";
+      returnToFeedButton.hidden = true;
+      feedSentinel.hidden = false;
+      updateCount();
+      if (!activeSeeds.length) {
+        showEmptyState();
+        return;
+      }
+      loadMoreButton.hidden = false;
+      loadMore();
+    }
+
+
+    function showGoogleSearchMessage(titleText, messageText) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      const title = document.createElement("strong");
+      title.textContent = titleText;
+      const message = document.createElement("span");
+      message.textContent = messageText;
+      empty.append(title, message);
+      productGrid.append(empty);
+    }
+
+    async function searchGoogleProducts(query) {
+      const requestId = ++googleSearchRequestId;
+      liveSearchActive = true;
+      activeSeeds = [];
+      loadedCount = 0;
+      catalogTitle.textContent = "Résultats Google Shopping";
+      resultCount.textContent = "Recherche de « " + query + " »…";
+      feedStatus.textContent = "Recherche des fiches produits en cours…";
+      productGrid.replaceChildren();
+      productGrid.setAttribute("aria-busy", "true");
+      returnToFeedButton.hidden = false;
+      loadMoreButton.hidden = true;
+      feedSentinel.hidden = true;
+
+      try {
+        const response = await fetch("/api/products?q=" + encodeURIComponent(query), {
+          headers: { Accept: "application/json" }
+        });
+        const data = await response.json();
+        if (requestId !== googleSearchRequestId) return;
+        if (!response.ok) throw new Error(data.error || "Google Shopping est indisponible.");
+
+        const results = Array.isArray(data.products) ? data.products : [];
+        productGrid.replaceChildren();
+        if (!results.length) {
+          resultCount.textContent = "Aucun résultat pour « " + query + " »";
+          feedStatus.textContent = "";
+          showGoogleSearchMessage(
+            "Aucun produit trouvé",
+            "Google Shopping n’a renvoyé aucune fiche pour cette recherche. Essaie avec un nom plus précis."
+          );
+          return;
+        }
+
+        results.forEach(product => productGrid.append(createGoogleProductCard(product)));
+        resultCount.textContent = formatCount(results.length) +
+          " fiches Google Shopping pour « " + query + " »";
+        feedStatus.textContent = "Résultats Google Shopping · " + (data.market || "France");
+      } catch (error) {
+        if (requestId !== googleSearchRequestId) return;
+        productGrid.replaceChildren();
+        resultCount.textContent = "La recherche Google Shopping n’a pas abouti";
+        feedStatus.textContent = "";
+        showGoogleSearchMessage("Recherche indisponible", error.message);
+      } finally {
+        if (requestId === googleSearchRequestId) {
+          productGrid.setAttribute("aria-busy", "false");
+        }
+      }
+    }
+
+    searchForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const query = searchInput.value.trim();
+      if (!query) return;
+      searchTerm = query;
+      activeCategory = "all";
+      filterButtons.forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.filter === "all"));
+      });
+      searchGoogleProducts(query);
+      document.querySelector(".catalog-head").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    returnToFeedButton.addEventListener("click", () => {
+      googleSearchRequestId += 1;
+      searchTerm = "";
+      searchInput.value = "";
+      activeCategory = "all";
+      filterButtons.forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.filter === "all"));
+      });
+      resetFeed();
+      document.querySelector(".catalog-head").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    filterButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        googleSearchRequestId += 1;
+        searchTerm = "";
+        searchInput.value = "";
+        activeCategory = button.dataset.filter;
+        filterButtons.forEach(filter => {
+          filter.setAttribute("aria-pressed", String(filter === button));
+        });
+        resetFeed();
+      });
+    });
+
+    loadMoreButton.addEventListener("click", loadMore);
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) loadMore();
+      }, { rootMargin: "850px 0px" });
+      observer.observe(feedSentinel);
+    }
+
+    resetFeed();
+  </script>
+  <button class="play-orb" id="playOrb" type="button" aria-label="Boule orange interactive : clique pour la faire briller, fais-la glisser pour la déplacer" aria-pressed="false" title="Attrape la boule pour la déplacer">
+    <span class="play-orb-ring" aria-hidden="true"></span>
+    <span class="play-orb-core" aria-hidden="true"><span class="play-orb-shine"></span></span>
+  </button>
+  <script>
+    (() => {
+      const orb = document.getElementById("playOrb");
+      if (!orb) return;
+      let dragging = false;
+      let moved = false;
+      let suppressClick = false;
+      let startX = 0;
+      let startY = 0;
+      let startLeft = 0;
+      let startTop = 0;
+
+      orb.addEventListener("pointerdown", event => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        dragging = true;
+        moved = false;
+        startX = event.clientX;
+        startY = event.clientY;
+        const rect = orb.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        orb.style.left = startLeft + "px";
+        orb.style.top = startTop + "px";
+        orb.style.right = "auto";
+        orb.style.bottom = "auto";
+        orb.classList.add("is-dragging");
+        try { orb.setPointerCapture(event.pointerId); } catch {}
+      });
+
+      orb.addEventListener("pointermove", event => {
+        if (!dragging) return;
+        const dx = event.clientX - startX;
+        const dy = event.clientY - startY;
+        if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+        if (!moved) return;
+        const maxLeft = Math.max(8, window.innerWidth - orb.offsetWidth - 8);
+        const maxTop = Math.max(8, window.innerHeight - orb.offsetHeight - 8);
+        const left = Math.max(8, Math.min(maxLeft, startLeft + dx));
+        const top = Math.max(8, Math.min(maxTop, startTop + dy));
+        orb.style.left = left + "px";
+        orb.style.top = top + "px";
+      });
+
+      const endDrag = event => {
+        if (!dragging) return;
+        dragging = false;
+        orb.classList.remove("is-dragging");
+        if (moved) {
+          suppressClick = true;
+          window.setTimeout(() => { suppressClick = false; }, 250);
+        }
+        try { if (orb.hasPointerCapture(event.pointerId)) orb.releasePointerCapture(event.pointerId); } catch {}
+      };
+      orb.addEventListener("pointerup", endDrag);
+      orb.addEventListener("pointercancel", endDrag);
+      orb.addEventListener("click", () => {
+        if (suppressClick) { suppressClick = false; return; }
+        const lit = orb.classList.toggle("is-charged");
+        orb.setAttribute("aria-pressed", String(lit));
+      });
+      orb.addEventListener("keydown", event => {
+        const steps = { ArrowUp: [0, -18], ArrowDown: [0, 18], ArrowLeft: [-18, 0], ArrowRight: [18, 0] };
+        const step = steps[event.key];
+        if (!step) return;
+        event.preventDefault();
+        const rect = orb.getBoundingClientRect();
+        const left = Math.max(8, Math.min(window.innerWidth - orb.offsetWidth - 8, rect.left + step[0]));
+        const top = Math.max(8, Math.min(window.innerHeight - orb.offsetHeight - 8, rect.top + step[1]));
+        orb.style.left = left + "px";
+        orb.style.top = top + "px";
+        orb.style.right = "auto";
+        orb.style.bottom = "auto";
+      });
+    })();
+  </script>
+</body>
+</html>

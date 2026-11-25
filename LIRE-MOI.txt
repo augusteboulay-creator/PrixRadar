@@ -1,0 +1,15 @@
+PRIXRADAR — FIL DE DÉCOUVERTE
+
+Le fil initial contient des produits de démonstration fictifs.
+Quand tu recherches un objet, PrixRadar interroge Google Shopping pour la France et affiche les fiches trouvées directement sur le site. Tu peux ouvrir l’offre du vendeur depuis chaque fiche.
+
+DÉMARRER SUR TON PC
+1. Garde Node.js 20 ou une version plus récente.
+2. Place ta clé SerpApi dans le fichier local .env. Ne partage pas ce fichier et ne l’envoie jamais sur GitHub.
+3. Double-clique sur start-prixradar.bat.
+4. Ouvre l’adresse locale indiquée par le programme.
+
+SUR RENDER
+Ajoute SERPAPI_KEY dans les variables d’environnement du service. Ne mets pas la clé dans index.html ni dans .env.example.
+
+La recherche affiche des offres fournies par Google Shopping. Les prix et la disponibilité peuvent changer : vérifie les détails sur le site du vendeur. Le fil de découverte reste composé d’exemples fictifs. PrixRadar ne compare pas les prix entre pays.
