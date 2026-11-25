@@ -32,13 +32,83 @@ function normalize(value) {
   return String(value || "").toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-function relevance(title, query) {
-  const tokens = normalize(query).split(/[^a-z0-9]+/).filter(token => token.length >= 2);
-  if (!tokens.length) return 1;
-  const normalizedTitle = normalize(title);
-  return tokens.filter(token => normalizedTitle.includes(token)).length / tokens.length;
+const SEARCH_STOPWORDS = new Set([
+  "a", "au", "aux", "de", "des", "du", "la", "le", "les", "un", "une",
+  "et", "en", "pour", "avec", "sur", "sans", "the", "and", "for", "with"
+]);
+const SEARCH_CATEGORY_TERMS = new Set([
+  "clavier", "claviers", "keyboard", "keyboards",
+  "smartphone", "smartphones", "telephone", "telephones", "phone", "phones",
+  "ordinateur", "ordinateurs", "pc", "laptop", "laptops",
+  "souris", "mouse", "mice", "casque", "casques", "headphone", "headphones",
+  "ecouteur", "ecouteurs", "earbud", "earbuds", "console", "consoles",
+  "tablette", "tablettes", "tablet", "tablets", "ecran", "ecrans",
+  "monitor", "monitors", "chaussure", "chaussures", "basket", "baskets",
+  "sneaker", "sneakers", "vetement", "vetements", "robe", "canape",
+  "lampe", "aspirateur", "maison", "sport", "gaming"
+]);
+const SEARCH_SYNONYM_GROUPS = [
+  ["clavier", "claviers", "keyboard", "keyboards"],
+  ["telephone", "telephones", "smartphone", "smartphones", "phone", "phones"],
+  ["ordinateur", "ordinateurs", "pc", "laptop", "laptops", "notebook", "notebooks"],
+  ["souris", "mouse", "mice"],
+  ["casque", "casques", "headphone", "headphones", "headset", "headsets"],
+  ["ecouteur", "ecouteurs", "earbud", "earbuds"],
+  ["tablette", "tablettes", "tablet", "tablets"],
+  ["ecran", "ecrans", "monitor", "monitors"],
+  ["chaussure", "chaussures", "basket", "baskets", "sneaker", "sneakers"]
+];
+
+function oneEditApart(left, right) {
+  if (left === right) return true;
+  if (Math.abs(left.length - right.length) > 1 || Math.min(left.length, right.length) < 3) return false;
+  let leftIndex = 0;
+  let rightIndex = 0;
+  let edits = 0;
+  while (leftIndex < left.length && rightIndex < right.length) {
+    if (left[leftIndex] === right[rightIndex]) {
+      leftIndex += 1;
+      rightIndex += 1;
+      continue;
+    }
+    edits += 1;
+    if (edits > 1) return false;
+    if (left.length > right.length) leftIndex += 1;
+    else if (right.length > left.length) rightIndex += 1;
+    else {
+      leftIndex += 1;
+      rightIndex += 1;
+    }
+  }
+  if (leftIndex < left.length || rightIndex < right.length) edits += 1;
+  return edits <= 1;
 }
 
+function tokenMatchWeight(queryToken, titleTokens) {
+  if (titleTokens.includes(queryToken)) return 1;
+  if (SEARCH_SYNONYM_GROUPS.some(group =>
+    group.includes(queryToken) && titleTokens.some(titleToken => group.includes(titleToken))
+  )) return 0.72;
+  if (/^\d+$/.test(queryToken)) return 0;
+  return titleTokens.some(titleToken => oneEditApart(queryToken, titleToken)) ? 0.62 : 0;
+}
+
+function relevance(title, query) {
+  const queryTokens = [...new Set(
+    normalize(query).split(/[^a-z0-9]+/).filter(token => token.length >= 2 && !SEARCH_STOPWORDS.has(token))
+  )];
+  const titleTokens = normalize(title).split(/[^a-z0-9]+/).filter(Boolean);
+  if (!queryTokens.length || !titleTokens.length) return 0;
+
+  let totalWeight = 0;
+  let matchedWeight = 0;
+  for (const token of queryTokens) {
+    const weight = SEARCH_CATEGORY_TERMS.has(token) ? 0.65 : /^\d+$/.test(token) ? 1.4 : 1.25;
+    totalWeight += weight;
+    matchedWeight += tokenMatchWeight(token, titleTokens) * weight;
+  }
+  return totalWeight ? matchedWeight / totalWeight : 0;
+}
 const ACCESSORY_TERMS = [
   "case", "cover", "charger", "adapter", "cable", "stand", "holder",
   "screen protector", "skin", "coque", "etui", "chargeur", "adaptateur",
@@ -90,10 +160,11 @@ function safeHttpsUrl(value) {
 
 function extractGoogleProductCards(results, query) {
   if (!Array.isArray(results)) return [];
-  return results.slice(0, 40).map(item => {
+  const candidates = results.slice(0, 40).map((item, originalPosition) => {
     const title = String(item.title || "").trim();
     const score = relevance(title, query);
     return {
+      originalPosition,
       title,
       price: String(item.price || ""),
       source: String(item.source || ""),
@@ -110,11 +181,30 @@ function extractGoogleProductCards(results, query) {
     };
   }).filter(item =>
     item.title &&
-    item.score >= 0.5 &&
+    item.score > 0 &&
     !isLikelyAccessory(item.title, query)
-  ).slice(0, 24);
-}
+  );
 
+  const unique = [...new Map(candidates.map(item => [normalize(item.title), item])).values()]
+    .sort((left, right) => right.score - left.score || left.originalPosition - right.originalPosition);
+  const strongMatches = unique.filter(item => item.score >= 0.5);
+  const includeAlternatives = strongMatches.length < 6;
+  const selected = includeAlternatives
+    ? unique.filter(item => item.score >= 0.12)
+    : strongMatches;
+
+  return selected.slice(0, 24).map(item => {
+    const { originalPosition, ...product } = item;
+    return {
+      ...product,
+      matchLabel: product.score >= 0.78
+        ? "Bonne correspondance"
+        : product.score >= 0.38
+          ? "R\u00e9sultat proche"
+          : "Alternative proche"
+    };
+  });
+}
 async function searchGoogleProducts(query, apiKey) {
   if (!apiKey || apiKey === "COLLE_TA_CLE_ICI") {
     throw new Error("Ajoute ta clé SerpApi dans le fichier .env ou dans Render.");
@@ -125,10 +215,12 @@ async function searchGoogleProducts(query, apiKey) {
   if (cached && cached.expiresAt > now) return cached.payload;
 
   const rawResults = await searchMarket(query, MARKETS.FR, apiKey);
+  const products = extractGoogleProductCards(rawResults, query);
   const payload = {
     query,
     market: MARKETS.FR.name,
-    products: extractGoogleProductCards(rawResults, query)
+    products,
+    expanded: products.some(product => product.matchLabel === "Alternative proche")
   };
   PRODUCT_SEARCH_CACHE.set(cacheKey, { expiresAt: now + PRODUCT_SEARCH_TTL_MS, payload });
   if (PRODUCT_SEARCH_CACHE.size > 100) {

@@ -1812,7 +1812,7 @@
 
       const tag = document.createElement("span");
       tag.className = "category-tag";
-      tag.textContent = "Google Shopping";
+      tag.textContent = product.matchLabel || "Google Shopping";
       imageWrap.append(tag);
 
       const body = document.createElement("div");
@@ -1966,7 +1966,8 @@
 
         results.forEach(product => productGrid.append(createGoogleProductCard(product)));
         resultCount.textContent = formatCount(results.length) +
-          " fiches Google Shopping pour « " + query + " »";
+          " fiches Google Shopping pour \"" + query + "\" - tri\u00e9es par pertinence" +
+          (data.expanded ? " - alternatives proches incluses" : "");
         feedStatus.textContent = "Résultats Google Shopping · " + (data.market || "France");
       } catch (error) {
         if (requestId !== googleSearchRequestId) return;
