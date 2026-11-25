@@ -1186,6 +1186,30 @@
     .feed-return:hover { border-color: #f18f50; background: rgba(255, 139, 56, .2); }
     .google-product-price { margin: 12px 0 5px; color: #ffad70; font-size: 20px; font-weight: 850; letter-spacing: -.4px; }
     .google-product-meta { margin: 5px 0; color: #b9aaa0; font-size: 11px; line-height: 1.5; }
+    .card.is-clickable { cursor: pointer; }
+    .card.is-clickable:focus-visible {
+      outline: 3px solid #ff984f;
+      outline-offset: 3px;
+    }
+    .detail-card-button {
+      display: inline-flex;
+      width: 100%;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 13px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 169, 106, .38);
+      border-radius: 11px;
+      color: #fff0e5;
+      background: linear-gradient(135deg, #ff923f, #ed641c);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, filter .18s ease;
+    }
+    .detail-card-button:hover { transform: translateY(-1px); filter: brightness(1.08); }
+    .detail-card-button:focus-visible { outline: 3px solid #ffb77d; outline-offset: 3px; }
     .google-product-link {
       display: inline-flex;
       align-items: center;
@@ -1678,6 +1702,41 @@
       return { ...seed, title, description, virtualId: index + 1 };
     }
 
+    function openProductDetails(product, source) {
+      try {
+        const selected = { ...product, _detailSource: source };
+        window.sessionStorage.setItem("prixradar:selectedProduct", JSON.stringify(selected));
+      } catch (error) {
+        // The title in the URL still lets the detail page open if storage is unavailable.
+      }
+      window.location.href = "/product.html?q=" + encodeURIComponent(product.title || "");
+    }
+
+    function createDetailsButton(product, source) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "detail-card-button";
+      button.textContent = "Découvrir la fiche →";
+      button.setAttribute("aria-label", "Découvrir la fiche détaillée de " + product.title);
+      button.addEventListener("click", () => openProductDetails(product, source));
+      return button;
+    }
+
+    function attachProductCardNavigation(card, product, source) {
+      card.classList.add("is-clickable");
+      card.tabIndex = 0;
+      card.setAttribute("role", "group");
+      card.setAttribute("aria-label", "Fiche produit cliquable : " + product.title);
+      card.addEventListener("click", event => {
+        if (event.target.closest("button, a")) return;
+        openProductDetails(product, source);
+      });
+      card.addEventListener("keydown", event => {
+        if (event.target !== card || (event.key !== "Enter" && event.key !== " ")) return;
+        event.preventDefault();
+        openProductDetails(product, source);
+      });
+    }
     function createProductCard(product) {
       const card = document.createElement("article");
       card.className = "card";
@@ -1725,6 +1784,8 @@
       description.className = "product-description";
       description.textContent = product.description;
       body.append(title, description);
+      body.append(createDetailsButton(product, "demo"));
+      attachProductCardNavigation(card, product, "demo");
       card.append(imageWrap, body);
       return card;
     }
@@ -1791,22 +1852,8 @@
         body.append(delivery);
       }
 
-      if (product.link) {
-        try {
-          const url = new URL(product.link);
-          if (url.protocol === "https:") {
-            const link = document.createElement("a");
-            link.className = "google-product-link";
-            link.href = url.toString();
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            link.textContent = "Voir la fiche produit ↗";
-            body.append(link);
-          }
-        } catch (error) {
-          // Invalid product links are omitted.
-        }
-      }
+      body.append(createDetailsButton(product, "google"));
+      attachProductCardNavigation(card, product, "google");
 
       card.append(imageWrap, body);
       return card;

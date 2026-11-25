@@ -102,6 +102,10 @@ function extractGoogleProductCards(results, query) {
       rating: item.rating == null || !Number.isFinite(Number(item.rating)) ? null : Number(item.rating),
       reviews: item.reviews == null || !Number.isFinite(Number(item.reviews)) ? null : Number(item.reviews),
       delivery: String(item.delivery || ""),
+      description: String(item.description || item.product_description || item.snippet || "").trim().slice(0, 1400),
+      details: Array.isArray(item.extensions)
+        ? item.extensions.filter(value => typeof value === "string").map(value => value.trim()).filter(Boolean).slice(0, 8)
+        : [],
       score
     };
   }).filter(item =>
@@ -170,9 +174,10 @@ function createServer() {
       }
       return;
     }
-    if (request.method === "GET" && (requestUrl.pathname === "/" || requestUrl.pathname === "/index.html")) {
+    if (request.method === "GET" && (requestUrl.pathname === "/" || requestUrl.pathname === "/index.html" || requestUrl.pathname === "/product.html")) {
       try {
-        const page = fs.readFileSync(path.join(ROOT, "index.html"));
+        const pageName = requestUrl.pathname === "/product.html" ? "product.html" : "index.html";
+        const page = fs.readFileSync(path.join(ROOT, pageName));
         response.writeHead(200, {
           "Content-Type": "text/html; charset=utf-8",
           "Cache-Control": "no-store",
